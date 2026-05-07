@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+venv/
+.venv/
+env/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Docker
+.docker/
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# SSL certificates (never commit)
+nginx/certs/*.crt
+nginx/certs/*.key
+nginx/certs/*.pem
+
+# Secrets
+secrets/

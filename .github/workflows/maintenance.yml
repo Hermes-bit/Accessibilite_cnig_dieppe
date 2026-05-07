@@ -1,0 +1,29 @@
+name: Maintenance
+
+on:
+  schedule:
+    # Every Sunday at 02:00 UTC
+    - cron: "0 2 * * 0"
+  workflow_dispatch:
+
+jobs:
+  health-check:
+    name: Production Health Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check /health endpoint
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://${{ secrets.DOMAIN }}/health)
+          if [ "$STATUS" != "200" ]; then
+            echo "Health check failed with status $STATUS"
+            exit 1
+          fi
+          echo "Health check passed: $STATUS"
+
+  dependabot-config:
+    name: Validate Dependabot config
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check .github/dependabot.yml exists
+        run: test -f .github/dependabot.yml && echo "Dependabot config found."
