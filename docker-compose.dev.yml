@@ -1,0 +1,39 @@
+version: "3.9"
+
+# Overrides for local development: hot-reload, no HTTPS, debug mode
+services:
+  backend:
+    build:
+      context: ./backend
+      target: deps
+    command: flask --app wsgi:app run --host=0.0.0.0 --port=8000 --debug --reload
+    volumes:
+      - ./backend:/app
+    environment:
+      FLASK_ENV: development
+      SECRET_KEY: dev-secret-key
+      JWT_SECRET_KEY: dev-jwt-secret
+      DATABASE_URL: ${DATABASE_URL}
+      CORS_ORIGINS: http://localhost:8080
+      ADMIN_USER: admin
+      ADMIN_PASSWORD_HASH: ""
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "8000:8000"
+
+  nginx:
+    ports:
+      - "8080:80"
+    volumes: []
+    # In dev, serve HTTP only — override the production nginx.conf
+    configs:
+      - source: nginx_dev
+        target: /etc/nginx/nginx.conf
+
+  redis:
+    environment: []
+    command: redis-server
+
+configs:
+  nginx_dev:
+    file: ./nginx/nginx-dev.conf

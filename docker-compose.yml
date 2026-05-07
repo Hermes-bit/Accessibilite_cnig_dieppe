@@ -1,0 +1,80 @@
+version: "3.9"
+
+x-backend-env: &backend-env
+  FLASK_ENV: ${FLASK_ENV:-production}
+  SECRET_KEY: ${SECRET_KEY}
+  JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+  DATABASE_URL: ${DATABASE_URL}
+  CORS_ORIGINS: ${CORS_ORIGINS:-https://${DOMAIN}}
+  ADMIN_USER: ${ADMIN_USER:-admin}
+  ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH}
+  REDIS_URL: redis://redis:6379/0
+
+services:
+  backend:
+    build:
+      context: ./backend
+      target: production
+    restart: unless-stopped
+    environment:
+      <<: *backend-env
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  mviewer:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    volumes:
+      - ./mviewer/config:/usr/share/nginx/html/apps/cnig:ro
+    networks:
+      - internal
+
+  nginx:
+    build: ./nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/certs:/etc/nginx/certs:ro
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+    depends_on:
+      - backend
+      - mviewer
+    networks:
+      - internal
+      - external
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --save 60 1 --requirepass ${REDIS_PASSWORD:-changeme}
+    volumes:
+      - redis_data:/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  redis_data:
+
+networks:
+  internal:
+    driver: bridge
+    internal: true
+  external:
+    driver: bridge

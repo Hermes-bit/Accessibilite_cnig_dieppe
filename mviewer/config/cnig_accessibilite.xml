@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+  <application
+    title="Accessibilité CNIG"
+    logo="img/logo.png"
+    favicon="img/favicon.png"
+    help=""
+    lang="fr"
+    showhelp="false"
+    olversion="8"
+    stats="false"
+    statsurl=""
+    togglealllayersfromtheme="false"
+  />
+
+  <mapoptions
+    projection="EPSG:3857"
+    center="-1.678,48.111"
+    zoom="13"
+    minzoom="6"
+    maxzoom="20"
+    projextent="-20037508.3428,-20037508.3428,20037508.3428,20037508.3428"
+  />
+
+  <proxy url="/proxy/?url=" useproxy="false" />
+
+  <baselayers style="default">
+    <baselayer
+      type="OSM"
+      label="OpenStreetMap"
+      title="OpenStreetMap"
+      visible="true"
+      thumb="img/basemap/osm.png"
+    />
+    <baselayer
+      type="WMTS"
+      label="IGN Plan"
+      title="Plan IGN"
+      url="https://wxs.ign.fr/essentiels/geoportail/wmts"
+      layers="GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2"
+      format="image/png"
+      style="normal"
+      matrixset="PM"
+      visible="false"
+      thumb="img/basemap/planign.png"
+    />
+  </baselayers>
+
+  <themes>
+    <theme name="Cheminements" id="cheminements" collapsed="false" icon="directions_walk">
+
+      <layer
+        id="troncons"
+        name="Tronçons de cheminement"
+        url="/api/v1/layers/troncons"
+        type="geojson"
+        visible="true"
+        queryable="true"
+        opacity="1"
+        legendurl=""
+        attribution="CNIG Accessibilité"
+        style="troncons"
+        fields="idtroncon,typetroncon,typesol,largeur,pente,devers,etatrevetement,accessibiliteglobale,statutvoie"
+        aliases="Identifiant,Type,Sol,Largeur (m),Pente (%),Dévers (%),État revêtement,Accessibilité globale,Statut voie"
+        tooltip="true"
+        cluster="false"
+        useproxy="false"
+        secure="true"
+      />
+
+      <layer
+        id="noeuds"
+        name="Noeuds de cheminement"
+        url="/api/v1/layers/noeuds"
+        type="geojson"
+        visible="false"
+        queryable="true"
+        opacity="1"
+        attribution="CNIG Accessibilité"
+        style="noeuds"
+        fields="idnoeud,bandeeveilvigilance,controlebev,masquecovisibilite"
+        aliases="Identifiant,Bande d'éveil,Contrôle BEV,Masque covisibilité"
+        tooltip="true"
+      />
+
+      <layer
+        id="obstacles"
+        name="Obstacles"
+        url="/api/v1/layers/obstacles"
+        type="geojson"
+        visible="true"
+        queryable="true"
+        opacity="1"
+        attribution="CNIG Accessibilité"
+        style="obstacles"
+        fields="idobstacle,typeobstacle,positionobstacle"
+        aliases="Identifiant,Type obstacle,Position"
+        tooltip="true"
+      />
+
+      <layer
+        id="traversees"
+        name="Traversées"
+        url="/api/v1/layers/traversees"
+        type="geojson"
+        visible="true"
+        queryable="true"
+        opacity="1"
+        attribution="CNIG Accessibilité"
+        style="traversees"
+        fields="idtraversee,etatrevetement"
+        aliases="Identifiant,État revêtement"
+        tooltip="true"
+      />
+
+    </theme>
+
+    <theme name="Équipements d'accessibilité" id="equipements" collapsed="true" icon="accessible">
+
+      <layer
+        id="ascenseurs"
+        name="Ascenseurs"
+        url="/api/v1/layers/ascenseurs"
+        type="geojson"
+        visible="true"
+        queryable="true"
+        opacity="1"
+        attribution="CNIG Accessibilité"
+        style="ascenseurs"
+        fields="idascenseur,etatrevetement,bandeeveilvigilance,voyantalerte"
+        aliases="Identifiant,État,Bande d'éveil,Voyant alerte"
+        tooltip="true"
+      />
+
+      <layer
+        id="escaliers"
+        name="Escaliers"
+        url="/api/v1/layers/escaliers"
+        type="geojson"
+        visible="true"
+        queryable="true"
+        opacity="1"
+        attribution="CNIG Accessibilité"
+        style="escaliers"
+        fields="idescalier,etatrevetement"
+        aliases="Identifiant,État revêtement"
+        tooltip="true"
+      />
+
+      <layer
+        id="rampes"
+        name="Rampes"
+        url="/api/v1/layers/rampes"
+        type="geojson"
+        visible="true"
+        queryable="true"
+        opacity="1"
+        attribution="CNIG Accessibilité"
+        style="rampes"
+        fields="idrampe,etatrevetement"
+        aliases="Identifiant,État revêtement"
+        tooltip="true"
+      />
+
+      <layer
+        id="elevateurs"
+        name="Élévateurs"
+        url="/api/v1/layers/elevateurs"
+        type="geojson"
+        visible="true"
+        queryable="true"
+        opacity="1"
+        attribution="CNIG Accessibilité"
+        style="elevateurs"
+        fields="idelevateur,etatrevetement"
+        aliases="Identifiant,État"
+        tooltip="true"
+      />
+
+      <layer
+        id="passages_selectifs"
+        name="Passages sélectifs"
+        url="/api/v1/layers/passages_selectifs"
+        type="geojson"
+        visible="true"
+        queryable="true"
+        opacity="1"
+        attribution="CNIG Accessibilité"
+        style="passages_selectifs"
+        fields="idpassage,bandeeveilvigilance"
+        aliases="Identifiant,Bande d'éveil"
+        tooltip="true"
+      />
+
+      <layer
+        id="quais"
+        name="Quais"
+        url="/api/v1/layers/quais"
+        type="geojson"
+        visible="false"
+        queryable="true"
+        opacity="1"
+        attribution="CNIG Accessibilité"
+        style="quais"
+        fields="idquai,etatrevetement"
+        aliases="Identifiant,État revêtement"
+        tooltip="true"
+      />
+
+    </theme>
+
+    <theme name="Stationnement PMR" id="stationnement" collapsed="true" icon="local_parking">
+
+      <layer
+        id="stationnements_pmr"
+        name="Stationnements PMR"
+        url="/api/v1/layers/stationnements_pmr"
+        type="geojson"
+        visible="true"
+        queryable="true"
+        opacity="0.7"
+        attribution="CNIG Accessibilité"
+        style="stationnements_pmr"
+        fields="idstationnement,etatrevetement,typesol"
+        aliases="Identifiant,État revêtement,Type sol"
+        tooltip="true"
+      />
+
+    </theme>
+
+    <theme name="ERP" id="erp" collapsed="true" icon="place">
+
+      <layer
+        id="erp"
+        name="Établissements recevant du public"
+        url="/api/v1/layers/erp"
+        type="geojson"
+        visible="true"
+        queryable="true"
+        opacity="1"
+        attribution="CNIG Accessibilité"
+        style="erp"
+        fields="iderp,nom,erpcategorie,erptype,adresse"
+        aliases="Identifiant,Nom,Catégorie ERP,Type ERP,Adresse"
+        tooltip="true"
+        cluster="true"
+      />
+
+      <layer
+        id="entrees"
+        name="Entrées ERP"
+        url="/api/v1/layers/entrees"
+        type="geojson"
+        visible="false"
+        queryable="true"
+        opacity="1"
+        attribution="CNIG Accessibilité"
+        style="entrees"
+        fields="identree,iderp,bandeeveilvigilance"
+        aliases="Identifiant,ERP associé,Bande d'éveil"
+        tooltip="true"
+      />
+
+    </theme>
+  </themes>
+</config>
