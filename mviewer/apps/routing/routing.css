@@ -1,0 +1,172 @@
+#routing-btn {
+    position: absolute;
+    top: 80px;
+    right: 10px;
+    z-index: 1000;
+    background: #2c3e50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.35);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+#routing-btn:hover { background: #1a252f; }
+
+#routing-panel {
+    position: absolute;
+    top: 80px;
+    right: 60px;
+    z-index: 999;
+    width: 320px;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.25);
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    display: none;
+}
+#routing-panel.open { display: block; }
+
+#routing-panel .rp-header {
+    background: #2c3e50;
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 6px 6px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+}
+#routing-panel .rp-header button {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+#routing-panel .rp-body { padding: 14px; }
+
+.rp-field { margin-bottom: 10px; position: relative; }
+.rp-field label { display: block; font-weight: bold; margin-bottom: 4px; color: #333; }
+
+.rp-input-row { display: flex; gap: 6px; }
+.rp-input-row input {
+    flex: 1;
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 13px;
+}
+.rp-input-row button {
+    padding: 6px 10px;
+    background: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    white-space: nowrap;
+}
+.rp-input-row button:hover { background: #2980b9; }
+.rp-input-row button.picking { background: #e67e22; }
+
+.rp-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0; right: 0;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    z-index: 1001;
+    max-height: 160px;
+    overflow-y: auto;
+    box-shadow: 0 4px 8px rgba(0,0,0,.15);
+}
+.rp-suggestions div {
+    padding: 7px 10px;
+    cursor: pointer;
+    font-size: 12px;
+    border-bottom: 1px solid #f0f0f0;
+}
+.rp-suggestions div:hover { background: #f0f7ff; }
+
+.rp-profiles { display: flex; gap: 6px; margin-bottom: 12px; }
+.rp-profile-btn {
+    flex: 1;
+    padding: 7px 4px;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    background: #f8f8f8;
+    cursor: pointer;
+    text-align: center;
+    font-size: 11px;
+    transition: all .2s;
+}
+.rp-profile-btn:hover { border-color: #3498db; background: #f0f7ff; }
+.rp-profile-btn.active { border-color: #2c3e50; background: #2c3e50; color: #fff; }
+.rp-profile-btn i { display: block; font-size: 18px; margin-bottom: 3px; }
+
+#rp-calculate {
+    width: 100%;
+    padding: 10px;
+    background: #27ae60;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+#rp-calculate:hover { background: #219a52; }
+#rp-calculate:disabled { background: #95a5a6; cursor: not-allowed; }
+
+#rp-result {
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+    display: none;
+}
+#rp-result.show { display: block; }
+
+.rp-stats { display: flex; gap: 8px; margin-bottom: 8px; }
+.rp-stat {
+    flex: 1;
+    text-align: center;
+    background: #f0f7ff;
+    border-radius: 4px;
+    padding: 8px 4px;
+}
+.rp-stat .val { font-size: 18px; font-weight: bold; color: #2c3e50; }
+.rp-stat .lbl { font-size: 10px; color: #666; }
+
+.rp-accessibility {
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+}
+.rp-accessibility.ok  { background: #d5f5e3; color: #1e8449; }
+.rp-accessibility.warn{ background: #fef9e7; color: #b7950b; }
+.rp-accessibility.bad { background: #fde8e8; color: #c0392b; }
+
+#rp-clear {
+    width: 100%;
+    padding: 7px;
+    background: #e74c3c;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+#rp-clear:hover { background: #c0392b; }
+
+.rp-hint { font-size: 11px; color: #888; text-align: center; margin: 4px 0; }
