@@ -2,21 +2,15 @@
 <config>
   <application
     title="Accessibilité CNIG"
-    logo="img/logo.png"
-    favicon="img/favicon.png"
-    help=""
     lang="fr"
     showhelp="false"
-    olversion="8"
     stats="false"
-    statsurl=""
-    togglealllayersfromtheme="false"
   />
 
   <mapoptions
     projection="EPSG:3857"
-    center="-1.678,48.111"
-    zoom="13"
+    center="119879,6432658"
+    zoom="14"
     minzoom="6"
     maxzoom="20"
     projextent="-20037508.3428,-20037508.3428,20037508.3428,20037508.3428"
@@ -24,243 +18,208 @@
 
   <proxy url="/proxy/?url=" useproxy="false" />
 
+  <extensions>
+    <extension type="component" id="routing" path="apps/routing/routing.js" title="Itinéraire"/>
+  </extensions>
+
   <baselayers style="default">
     <baselayer
       type="OSM"
       label="OpenStreetMap"
       title="OpenStreetMap"
       visible="true"
-      thumb="img/basemap/osm.png"
-    />
-    <baselayer
-      type="WMTS"
-      label="IGN Plan"
-      title="Plan IGN"
-      url="https://wxs.ign.fr/essentiels/geoportail/wmts"
-      layers="GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2"
-      format="image/png"
-      style="normal"
-      matrixset="PM"
-      visible="false"
-      thumb="img/basemap/planign.png"
     />
   </baselayers>
 
   <themes>
-    <theme name="Cheminements" id="cheminements" collapsed="false" icon="directions_walk">
 
+    <!-- ═══════════════════════════════════════════════════
+         CHEMINEMENTS  (712 tronçons · 765 nœuds · 304 traversées)
+    ═══════════════════════════════════════════════════ -->
+    <theme name="Cheminements" id="cheminements" collapsed="false" icon="fas fa-walking">
+
+      <!-- Vue enrichie avec libellés et couleur d'accessibilité -->
       <layer
         id="troncons"
-        name="Tronçons de cheminement"
-        url="/api/v1/layers/troncons"
+        name="Tronçons de cheminement (712)"
+        url="http://localhost:5000/api/v1/layers/v_troncons"
         type="geojson"
         visible="true"
         queryable="true"
         opacity="1"
-        legendurl=""
         attribution="CNIG Accessibilité"
-        style="troncons"
-        fields="idtroncon,typetroncon,typesol,largeur,pente,devers,etatrevetement,accessibiliteglobale,statutvoie"
-        aliases="Identifiant,Type,Sol,Largeur (m),Pente (%),Dévers (%),État revêtement,Accessibilité globale,Statut voie"
+        fields="idtroncon,typetroncon_libelle,statutvoie_libelle,largeurutile,pente,devers,typesol_libelle,etat_libelle,accessibiliteglobale,niveau_acces_calcule,nb_obstacles,longueur"
+        aliases="Identifiant,Type,Statut voie,Largeur utile (m),Pente (%),Dévers (%),Type sol,État revêtement,Accessibilité globale,Niveau accès,Nb obstacles,Longueur (m)"
         tooltip="true"
         cluster="false"
-        useproxy="false"
-        secure="true"
       />
 
       <layer
         id="noeuds"
-        name="Noeuds de cheminement"
-        url="/api/v1/layers/noeuds"
+        name="Nœuds de cheminement (765)"
+        url="http://localhost:5000/api/v1/layers/noeud_cheminement"
         type="geojson"
         visible="false"
         queryable="true"
         opacity="1"
         attribution="CNIG Accessibilité"
-        style="noeuds"
-        fields="idnoeud,bandeeveilvigilance,controlebev,masquecovisibilite"
-        aliases="Identifiant,Bande d'éveil,Contrôle BEV,Masque covisibilité"
-        tooltip="true"
-      />
-
-      <layer
-        id="obstacles"
-        name="Obstacles"
-        url="/api/v1/layers/obstacles"
-        type="geojson"
-        visible="true"
-        queryable="true"
-        opacity="1"
-        attribution="CNIG Accessibilité"
-        style="obstacles"
-        fields="idobstacle,typeobstacle,positionobstacle"
-        aliases="Identifiant,Type obstacle,Position"
+        fields="idnoeud,bandeeveilvigilance,controlebev,bandeinterception,masquecovisibilite,hauteurressaut,altitude"
+        aliases="Identifiant,Bande éveil vigilance,Contrôle BEV,Bande interception,Masque covisibilité,Hauteur ressaut,Altitude"
         tooltip="true"
       />
 
       <layer
         id="traversees"
-        name="Traversées"
-        url="/api/v1/layers/traversees"
+        name="Traversées (304)"
+        url="http://localhost:5000/api/v1/layers/traversee"
         type="geojson"
         visible="true"
         queryable="true"
         opacity="1"
         attribution="CNIG Accessibilité"
-        style="traversees"
-        fields="idtraversee,etatrevetement"
-        aliases="Identifiant,État revêtement"
+        fields="idtraversee,typetroncon,etatrevetement,bandesblanches,etatmarquage,eclairage,feupietons,aidesonore,reperelineaire,masquecovisibilite,voiestraversees"
+        aliases="Identifiant,Type,État revêtement,Bandes blanches,État marquage,Éclairage,Feu piétons,Aide sonore,Repère linéaire,Masque covisibilité,Nb voies traversées"
         tooltip="true"
       />
 
-    </theme>
-
-    <theme name="Équipements d'accessibilité" id="equipements" collapsed="true" icon="accessible">
-
+      <!-- Vue enrichie avec libellés et couleur obstacle -->
       <layer
-        id="ascenseurs"
-        name="Ascenseurs"
-        url="/api/v1/layers/ascenseurs"
+        id="obstacles"
+        name="Obstacles (3017)"
+        url="http://localhost:5000/api/v1/layers/v_obstacles"
         type="geojson"
         visible="true"
         queryable="true"
         opacity="1"
         attribution="CNIG Accessibilité"
-        style="ascenseurs"
-        fields="idascenseur,etatrevetement,bandeeveilvigilance,voyantalerte"
-        aliases="Identifiant,État,Bande d'éveil,Voyant alerte"
-        tooltip="true"
-      />
-
-      <layer
-        id="escaliers"
-        name="Escaliers"
-        url="/api/v1/layers/escaliers"
-        type="geojson"
-        visible="true"
-        queryable="true"
-        opacity="1"
-        attribution="CNIG Accessibilité"
-        style="escaliers"
-        fields="idescalier,etatrevetement"
-        aliases="Identifiant,État revêtement"
-        tooltip="true"
-      />
-
-      <layer
-        id="rampes"
-        name="Rampes"
-        url="/api/v1/layers/rampes"
-        type="geojson"
-        visible="true"
-        queryable="true"
-        opacity="1"
-        attribution="CNIG Accessibilité"
-        style="rampes"
-        fields="idrampe,etatrevetement"
-        aliases="Identifiant,État revêtement"
-        tooltip="true"
-      />
-
-      <layer
-        id="elevateurs"
-        name="Élévateurs"
-        url="/api/v1/layers/elevateurs"
-        type="geojson"
-        visible="true"
-        queryable="true"
-        opacity="1"
-        attribution="CNIG Accessibilité"
-        style="elevateurs"
-        fields="idelevateur,etatrevetement"
-        aliases="Identifiant,État"
-        tooltip="true"
-      />
-
-      <layer
-        id="passages_selectifs"
-        name="Passages sélectifs"
-        url="/api/v1/layers/passages_selectifs"
-        type="geojson"
-        visible="true"
-        queryable="true"
-        opacity="1"
-        attribution="CNIG Accessibilité"
-        style="passages_selectifs"
-        fields="idpassage,bandeeveilvigilance"
-        aliases="Identifiant,Bande d'éveil"
-        tooltip="true"
-      />
-
-      <layer
-        id="quais"
-        name="Quais"
-        url="/api/v1/layers/quais"
-        type="geojson"
-        visible="false"
-        queryable="true"
-        opacity="1"
-        attribution="CNIG Accessibilité"
-        style="quais"
-        fields="idquai,etatrevetement"
-        aliases="Identifiant,État revêtement"
-        tooltip="true"
-      />
-
-    </theme>
-
-    <theme name="Stationnement PMR" id="stationnement" collapsed="true" icon="local_parking">
-
-      <layer
-        id="stationnements_pmr"
-        name="Stationnements PMR"
-        url="/api/v1/layers/stationnements_pmr"
-        type="geojson"
-        visible="true"
-        queryable="true"
-        opacity="0.7"
-        attribution="CNIG Accessibilité"
-        style="stationnements_pmr"
-        fields="idstationnement,etatrevetement,typesol"
-        aliases="Identifiant,État revêtement,Type sol"
-        tooltip="true"
-      />
-
-    </theme>
-
-    <theme name="ERP" id="erp" collapsed="true" icon="place">
-
-      <layer
-        id="erp"
-        name="Établissements recevant du public"
-        url="/api/v1/layers/erp"
-        type="geojson"
-        visible="true"
-        queryable="true"
-        opacity="1"
-        attribution="CNIG Accessibilité"
-        style="erp"
-        fields="iderp,nom,erpcategorie,erptype,adresse"
-        aliases="Identifiant,Nom,Catégorie ERP,Type ERP,Adresse"
+        fields="idobstacle,type_libelle,position_libelle,largeurutile,longueurobstacle,largeurobstacle,hauteurobsposesol,hauteursousobs,reperabilitevisuelle,commentaire"
+        aliases="Identifiant,Type obstacle,Position,Largeur utile (m),Longueur obstacle,Largeur obstacle,Hauteur / sol,Hauteur sous obstacle,Repérabilité visuelle,Commentaire"
         tooltip="true"
         cluster="true"
       />
 
       <layer
-        id="entrees"
-        name="Entrées ERP"
-        url="/api/v1/layers/entrees"
+        id="circulation"
+        name="Zones de circulation (585)"
+        url="http://localhost:5000/api/v1/layers/circulation"
+        type="geojson"
+        visible="false"
+        queryable="true"
+        opacity="0.6"
+        attribution="CNIG Accessibilité"
+        fields="idcirculation,typetroncon,statutvoie,largeurutile,pente,devers,typesol,etatrevetement,eclairage,typepassage,couvert,longueur"
+        aliases="Identifiant,Type,Statut voie,Largeur utile (m),Pente (%),Dévers (%),Type sol,État revêtement,Éclairage,Type passage,Couvert,Longueur (m)"
+        tooltip="true"
+      />
+
+    </theme>
+
+    <!-- ═══════════════════════════════════════════════════
+         ÉQUIPEMENTS D'ACCESSIBILITÉ
+    ═══════════════════════════════════════════════════ -->
+    <theme name="Équipements d'accessibilité" id="equipements" collapsed="true" icon="fas fa-wheelchair">
+
+      <layer
+        id="escaliers"
+        name="Escaliers (15)"
+        url="http://localhost:5000/api/v1/layers/escalier"
+        type="geojson"
+        visible="true"
+        queryable="true"
+        opacity="1"
+        attribution="CNIG Accessibilité"
+        fields="idescalier,typetroncon,statutvoie,etatrevetement,maincourante,dispositifvigilance,contrastevisuel,largeurutile,nbmarches,hauteurmarche,giron,pente"
+        aliases="Identifiant,Type,Statut voie,État revêtement,Main courante,Dispositif vigilance,Contraste visuel,Largeur utile (m),Nb marches,Hauteur marche,Giron,Pente (%)"
+        tooltip="true"
+      />
+
+      <layer
+        id="rampes"
+        name="Rampes (28)"
+        url="http://localhost:5000/api/v1/layers/rampe"
+        type="geojson"
+        visible="true"
+        queryable="true"
+        opacity="1"
+        attribution="CNIG Accessibilité"
+        fields="idrampe,typetroncon,statutvoie,etatrevetement,largeurutile,maincourante,pente,devers,chasseroue,airerotation,distpalierrepos"
+        aliases="Identifiant,Type,Statut voie,État revêtement,Largeur utile (m),Main courante,Pente (%),Dévers (%),Chasse-roue,Aire rotation,Distance palier repos (m)"
+        tooltip="true"
+      />
+
+      <layer
+        id="quais"
+        name="Quais (58)"
+        url="http://localhost:5000/api/v1/layers/quai"
         type="geojson"
         visible="false"
         queryable="true"
         opacity="1"
         attribution="CNIG Accessibilité"
-        style="entrees"
-        fields="identree,iderp,bandeeveilvigilance"
-        aliases="Identifiant,ERP associé,Bande d'éveil"
+        fields="idquai,typetroncon,statutvoie,etatrevetement,hauteur,largeurpassage,signalisationporte,dispositifvigilance,diamzonemanoeuvre,longueur"
+        aliases="Identifiant,Type,Statut voie,État revêtement,Hauteur (m),Largeur passage (m),Signalisation porte,Dispositif vigilance,Diam. zone manœuvre,Longueur (m)"
+        tooltip="true"
+      />
+
+      <layer
+        id="passage_selectif"
+        name="Passages sélectifs (1)"
+        url="http://localhost:5000/api/v1/layers/passage_selectif"
+        type="geojson"
+        visible="true"
+        queryable="true"
+        opacity="1"
+        attribution="CNIG Accessibilité"
+        fields="idpassageselectif,bandeeveilvigilance,hauteurressaut,controlebev,bandeinterception,passagemecanique,largeurutile,profondeur,contrastevisuel"
+        aliases="Identifiant,Bande éveil vigilance,Hauteur ressaut,Contrôle BEV,Bande interception,Passage mécanique,Largeur utile (m),Profondeur,Contraste visuel"
         tooltip="true"
       />
 
     </theme>
+
+    <!-- ═══════════════════════════════════════════════════
+         STATIONNEMENT PMR  (46 places)
+    ═══════════════════════════════════════════════════ -->
+    <theme name="Stationnement PMR" id="stationnement" collapsed="true" icon="fas fa-parking">
+
+      <layer
+        id="stationnements_pmr"
+        name="Stationnements PMR (46)"
+        url="http://localhost:5000/api/v1/layers/stationnement_pmr"
+        type="geojson"
+        visible="true"
+        queryable="true"
+        opacity="0.7"
+        attribution="CNIG Accessibilité"
+        fields="idstationnement,typestationnement,etatrevetement,typesol,largeurstat,longueurstat,bandlatsecurite,surlongueur,signalpmr,marquagesol,pente,devers"
+        aliases="Identifiant,Type stationnement,État revêtement,Type sol,Largeur (m),Longueur (m),Bande latérale sécurité,Sur-longueur,Signal PMR,Marquage sol,Pente (%),Dévers (%)"
+        tooltip="true"
+      />
+
+    </theme>
+
+    <!-- ═══════════════════════════════════════════════════
+         ERP & ENTRÉES  (89 entrées)
+         NB : la table erp est vide pour l'instant
+    ═══════════════════════════════════════════════════ -->
+    <theme name="Entrées ERP" id="erp" collapsed="true" icon="fas fa-door-open">
+
+      <layer
+        id="entrees"
+        name="Entrées ERP (89)"
+        url="http://localhost:5000/api/v1/layers/entree"
+        type="geojson"
+        visible="true"
+        queryable="true"
+        opacity="1"
+        attribution="CNIG Accessibilité"
+        fields="identree,iderp,adresse,typeentree,rampe,ascenseur,escaliernbmarche,largeurpassage,typeporte,typeouverture,espacemanoeuvre,bandeeveilvigilance,eclairage,controleacces"
+        aliases="Identifiant,ERP associé,Adresse,Type entrée,Rampe,Ascenseur,Nb marches escalier,Largeur passage (m),Type porte,Type ouverture,Espace manœuvre,Bande éveil vigilance,Éclairage,Contrôle accès"
+        tooltip="true"
+        cluster="true"
+      />
+
+    </theme>
+
   </themes>
 </config>
