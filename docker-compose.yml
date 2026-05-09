@@ -1,4 +1,3 @@
-version: "3.9"
 
 x-backend-env: &backend-env
   FLASK_ENV: ${FLASK_ENV:-production}
@@ -9,6 +8,11 @@ x-backend-env: &backend-env
   ADMIN_USER: ${ADMIN_USER:-admin}
   ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH}
   REDIS_URL: redis://redis:6379/0
+  MAIL_SERVER: ${MAIL_SERVER:-}
+  MAIL_PORT: ${MAIL_PORT:-587}
+  MAIL_USERNAME: ${MAIL_USERNAME:-}
+  MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+  MAIL_FROM: ${MAIL_FROM:-}
 
 services:
   backend:
@@ -39,9 +43,6 @@ services:
   nginx:
     build: ./nginx
     restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
     volumes:
       - ./nginx/certs:/etc/nginx/certs:ro
     environment:

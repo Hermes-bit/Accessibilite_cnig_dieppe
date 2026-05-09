@@ -1,5 +1,8 @@
-import os
-from flask import request, jsonify
+import re
+from datetime import datetime, timezone
+from functools import wraps
+
+from flask import request, jsonify, current_app
 from flask_jwt_extended import (
     create_access_token,
     create_refresh_token,
@@ -7,60 +10,206 @@ from flask_jwt_extended import (
     get_jwt_identity,
     get_jwt,
 )
-from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db, limiter
+from app.models.user import AppUser
+from app.utils.email_service import generate_temp_password, send_temp_password
 from . import auth_bp
 
-# Simple user store — replace with a proper User model + DB table in production.
-# Loaded from environment variables: ADMIN_USER / ADMIN_PASSWORD_HASH
-_USERS = {
-    os.environ.get("ADMIN_USER", "admin"): os.environ.get(
-        "ADMIN_PASSWORD_HASH",
-        generate_password_hash("changeme"),
-    )
-}
-
-# In-memory token blocklist — replace with Redis in production.
+# ─── In-memory token blocklist (fallback when Redis is unavailable) ───────────
 _TOKEN_BLOCKLIST: set[str] = set()
+
+_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
+# ─── Helpers ──────────────────────────────────────────────────────────────────
+
+def _is_token_revoked(jwt_header, jwt_payload) -> bool:
+    jti = jwt_payload["jti"]
+    try:
+        from app import jwt as jwt_manager  # noqa: F401  (avoid circular at module level)
+        redis_client = _get_redis()
+        if redis_client:
+            return redis_client.get(f"jwt_blocklist:{jti}") is not None
+    except Exception:
+        pass
+    return jti in _TOKEN_BLOCKLIST
+
+
+def _get_redis():
+    """Return a Redis client if REDIS_URL is configured, else None."""
+    redis_url = current_app.config.get("RATELIMIT_STORAGE_URL", "memory://")
+    if redis_url.startswith("redis://"):
+        try:
+            import redis
+            return redis.from_url(redis_url)
+        except Exception:
+            pass
+    return None
+
+
+def _revoke_token(jti: str) -> None:
+    redis_client = _get_redis()
+    if redis_client:
+        try:
+            redis_client.set(f"jwt_blocklist:{jti}", "1", ex=60 * 60 * 24 * 31)
+            return
+        except Exception:
+            pass
+    _TOKEN_BLOCKLIST.add(jti)
+
+
+def _require_admin(fn):
+    """Decorator that ensures the JWT identity belongs to an active admin user."""
+    @wraps(fn)
+    @jwt_required()
+    def wrapper(*args, **kwargs):
+        identity = get_jwt_identity()
+        user = AppUser.query.filter_by(email=identity).first()
+        if not user or not user.is_active or user.user_type != "admin":
+            return jsonify({"error": "Accès réservé aux administrateurs"}), 403
+        return fn(*args, **kwargs)
+    return wrapper
+
+
+# ─── Routes ───────────────────────────────────────────────────────────────────
+
+@auth_bp.route("/request-access", methods=["POST"])
+@limiter.limit("5 per minute")
+def request_access():
+    data = request.get_json(silent=True) or {}
+    email = (data.get("email") or "").strip().lower()
+
+    if not email or not _EMAIL_RE.match(email):
+        return jsonify({"error": "Adresse e-mail invalide"}), 400
+
+    temp_password = generate_temp_password()
+
+    user = AppUser.query.filter_by(email=email).first()
+    if user:
+        # Re-generate password and reset first_login flag regardless of is_active
+        user.set_password(temp_password)
+        user.first_login = True
+    else:
+        user = AppUser(email=email)
+        user.set_password(temp_password)
+        db.session.add(user)
+
+    db.session.commit()
+
+    import os
+    mail_configured = bool(os.environ.get("MAIL_SERVER", "").strip())
+
+    try:
+        send_temp_password(email, temp_password)
+    except Exception:
+        current_app.logger.exception(
+            "Impossible d'envoyer l'e-mail à %s", email
+        )
+
+    if not mail_configured:
+        # Dev mode : retourne le mot de passe directement (pas d'e-mail réel)
+        return jsonify({
+            "message": "Aucun serveur mail configuré — voici votre mot de passe temporaire :",
+            "dev_password": temp_password,
+        }), 200
+
+    return jsonify({"message": "Un mot de passe a été envoyé à votre adresse"}), 200
 
 
 @auth_bp.route("/login", methods=["POST"])
 @limiter.limit("10 per minute")
 def login():
     data = request.get_json(silent=True) or {}
-    username = data.get("username", "").strip()
-    password = data.get("password", "")
+    email = (data.get("email") or "").strip().lower()
+    password = data.get("password") or ""
 
-    if not username or not password:
+    if not email or not password:
         return jsonify({"error": "Identifiants manquants"}), 400
 
-    stored_hash = _USERS.get(username)
-    if not stored_hash or not check_password_hash(stored_hash, password):
+    user = AppUser.query.filter_by(email=email).first()
+    if not user or not user.is_active or not user.check_password(password):
         return jsonify({"error": "Identifiants invalides"}), 401
 
-    access_token = create_access_token(identity=username)
-    refresh_token = create_refresh_token(identity=username)
-    return jsonify(access_token=access_token, refresh_token=refresh_token)
+    user.last_login = datetime.now(timezone.utc)
+    db.session.commit()
+
+    access_token = create_access_token(identity=email)
+    refresh_token = create_refresh_token(identity=email)
+
+    return jsonify(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        user=user.to_dict(),
+    ), 200
 
 
-@auth_bp.route("/refresh", methods=["POST"])
-@jwt_required(refresh=True)
-def refresh():
-    identity = get_jwt_identity()
-    access_token = create_access_token(identity=identity)
-    return jsonify(access_token=access_token)
-
-
-@auth_bp.route("/logout", methods=["DELETE"])
+@auth_bp.route("/change-password", methods=["POST"])
 @jwt_required()
-def logout():
-    jti = get_jwt()["jti"]
-    _TOKEN_BLOCKLIST.add(jti)
-    return jsonify({"message": "Déconnexion réussie"})
+def change_password():
+    identity = get_jwt_identity()
+    user = AppUser.query.filter_by(email=identity).first()
+    if not user or not user.is_active:
+        return jsonify({"error": "Utilisateur introuvable"}), 404
+
+    data = request.get_json(silent=True) or {}
+    new_password = data.get("password") or ""
+
+    if len(new_password) < 6:
+        return jsonify({"error": "Le mot de passe doit contenir au moins 6 caractères"}), 400
+
+    user.set_password(new_password)
+    user.first_login = False
+    db.session.commit()
+
+    return jsonify({"message": "Mot de passe modifié"}), 200
 
 
 @auth_bp.route("/me", methods=["GET"])
 @jwt_required()
 def me():
-    return jsonify({"username": get_jwt_identity()})
+    identity = get_jwt_identity()
+    user = AppUser.query.filter_by(email=identity).first()
+    if not user or not user.is_active:
+        return jsonify({"error": "Utilisateur introuvable"}), 404
+    return jsonify(user.to_dict()), 200
+
+
+@auth_bp.route("/logout", methods=["POST"])
+@jwt_required()
+def logout():
+    jti = get_jwt()["jti"]
+    _revoke_token(jti)
+    return jsonify({"message": "Déconnexion réussie"}), 200
+
+
+@auth_bp.route("/admin/users", methods=["GET"])
+@_require_admin
+def admin_list_users():
+    users = AppUser.query.order_by(AppUser.created_at.desc()).all()
+    return jsonify([u.to_dict() for u in users]), 200
+
+
+@auth_bp.route("/admin/users/<int:user_id>", methods=["PATCH"])
+@_require_admin
+def admin_update_user(user_id: int):
+    user = AppUser.query.get(user_id)
+    if not user:
+        return jsonify({"error": "Utilisateur introuvable"}), 404
+
+    data = request.get_json(silent=True) or {}
+
+    valid_types = {"viewer", "editor", "creator", "admin"}
+    if "user_type" in data:
+        if data["user_type"] not in valid_types:
+            return jsonify({"error": "Type d'utilisateur invalide"}), 400
+        user.user_type = data["user_type"]
+
+    if "is_active" in data:
+        user.is_active = bool(data["is_active"])
+
+    if "display_name" in data:
+        user.display_name = (data["display_name"] or "").strip() or None
+
+    db.session.commit()
+    return jsonify(user.to_dict()), 200
