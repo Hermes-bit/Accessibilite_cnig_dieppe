@@ -1,6 +1,5 @@
-version: "3.9"
 
-# Overrides for local development: hot-reload, no HTTPS, debug mode
+# Overrides for local development — HTTP uniquement, hot-reload
 services:
   backend:
     build:
@@ -14,26 +13,39 @@ services:
       SECRET_KEY: dev-secret-key
       JWT_SECRET_KEY: dev-jwt-secret
       DATABASE_URL: ${DATABASE_URL}
-      CORS_ORIGINS: http://localhost:8080
+      CORS_ORIGINS: http://localhost:8081
       ADMIN_USER: admin
       ADMIN_PASSWORD_HASH: ""
       REDIS_URL: redis://redis:6379/0
+      MAIL_SERVER: ${MAIL_SERVER:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-}
     ports:
       - "8000:8000"
 
+  mviewer:
+    volumes:
+      - ./mviewer/apps:/usr/share/nginx/html/apps
+      - ./mviewer/config/cnig_accessibilite.xml:/usr/share/nginx/html/apps/cnig_accessibilite.xml
+
   nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.dev
     ports:
-      - "8080:80"
+      - "8081:80"
     volumes: []
-    # In dev, serve HTTP only — override the production nginx.conf
-    configs:
-      - source: nginx_dev
-        target: /etc/nginx/nginx.conf
+    depends_on:
+      - backend
+      - mviewer
 
   redis:
     environment: []
     command: redis-server
 
-configs:
-  nginx_dev:
-    file: ./nginx/nginx-dev.conf
+# En dev, le réseau interne doit pouvoir atteindre la BDD externe (alwaysdata)
+networks:
+  internal:
+    internal: false

@@ -1,0 +1,6 @@
+{
+  "title": "Calcul d'itinéraire",
+  "thumbnail": "img/no_thumbnail.png",
+  "js": ["routing.js"],
+  "css": ["routing.css"]
+}
