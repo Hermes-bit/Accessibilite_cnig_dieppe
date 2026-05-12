@@ -38,7 +38,7 @@ jobs:
             type=sha
 
       - name: Build and push backend
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           context: ./backend
           target: production
@@ -56,7 +56,7 @@ jobs:
             type=sha
 
       - name: Build and push nginx
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           context: ./nginx
           push: true
