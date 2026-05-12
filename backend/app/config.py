@@ -20,6 +20,14 @@ class BaseConfig:
     RATELIMIT_DEFAULT = "200 per day;50 per hour"
     RATELIMIT_STORAGE_URL = os.environ.get("REDIS_URL", "memory://")
 
+    # Dossier mviewer à servir comme fichiers statiques (vide = désactivé)
+    MVIEWER_DIR = os.environ.get(
+        "MVIEWER_DIR",
+        os.path.normpath(
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "mviewer-dist")
+        ),
+    )
+
 
 class DevelopmentConfig(BaseConfig):
     DEBUG = True

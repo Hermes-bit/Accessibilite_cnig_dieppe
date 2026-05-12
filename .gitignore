@@ -41,3 +41,6 @@ nginx/certs/*.pem
 
 # Secrets
 secrets/
+
+# Build artifacts
+mviewer-dist/

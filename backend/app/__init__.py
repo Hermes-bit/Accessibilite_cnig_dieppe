@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask
+from flask import Flask, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_limiter import Limiter
@@ -49,5 +49,15 @@ def create_app(config_name: str = "development") -> Flask:
     @app.route("/health")
     def health():
         return {"status": "ok", "version": "1.0.0"}
+
+    mviewer_dir = app.config.get("MVIEWER_DIR", "")
+    if mviewer_dir and os.path.isdir(mviewer_dir):
+        @app.route("/", defaults={"path": "index.html"})
+        @app.route("/<path:path>")
+        def serve_mviewer(path):
+            target = os.path.join(mviewer_dir, path)
+            if os.path.isfile(target):
+                return send_from_directory(mviewer_dir, path)
+            return send_from_directory(mviewer_dir, "index.html")
 
     return app
