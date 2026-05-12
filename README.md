@@ -199,4 +199,4 @@ make security-scan
 
 ## Licence
 
-À définir — données sous standard CNIG © IGN / Ministère de la Transition écologique.
+À définir — données sous standard CNIG © IGN.
