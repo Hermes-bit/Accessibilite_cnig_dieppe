@@ -8,7 +8,7 @@ ALWAYSDATA_USER="${1:?'Usage: deploy-alwaysdata.sh <alwaysdata_user> <domaine>'}
 DOMAIN="${2:?'Usage: deploy-alwaysdata.sh <alwaysdata_user> <domaine>'}"
 SSH_HOST="ssh-${ALWAYSDATA_USER}.alwaysdata.net"
 REMOTE_DIR="/home/${ALWAYSDATA_USER}/cnig-accessibilite"
-REPO_URL="git@github.com:Hermes-bit/Accessibilite_cnig_dieppe.git"
+REPO_URL="https://github.com/Hermes-bit/Accessibilite_cnig_dieppe.git"
 
 echo "════════════════════════════════════════════════════════════════════"
 echo "  Déploiement → ${ALWAYSDATA_USER}@${SSH_HOST}"
