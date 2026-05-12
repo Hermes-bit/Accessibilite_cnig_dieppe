@@ -1,0 +1,48 @@
+name: Deploy mviewer → GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'mviewer/**'
+      - '.github/workflows/deploy-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cloner mviewer (core)
+        run: |
+          git clone --depth 1 --branch master https://github.com/mviewer/mviewer.git _site
+          rm -rf _site/.git _site/demo _site/docs
+
+      - name: Injecter les fichiers CNIG
+        run: |
+          cp -r mviewer/apps/* _site/apps/
+          cp mviewer/config/cnig_accessibilite.xml _site/apps/cnig_accessibilite.xml
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

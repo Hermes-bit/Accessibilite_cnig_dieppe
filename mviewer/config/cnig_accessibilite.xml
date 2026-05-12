@@ -70,7 +70,7 @@
       <layer
         id="troncons"
         name="Tronçons de cheminement (712)"
-        url="/api/v1/layers/v_troncons"
+        url="https://hermes58.alwaysdata.net/api/v1/layers/v_troncons"
         type="geojson"
         visible="true"
         queryable="true"
@@ -85,7 +85,7 @@
       <layer
         id="noeuds"
         name="Nœuds de cheminement (765)"
-        url="/api/v1/layers/noeud_cheminement"
+        url="https://hermes58.alwaysdata.net/api/v1/layers/noeud_cheminement"
         type="geojson"
         visible="false"
         queryable="true"
@@ -99,7 +99,7 @@
       <layer
         id="traversees"
         name="Traversées (304)"
-        url="/api/v1/layers/traversee"
+        url="https://hermes58.alwaysdata.net/api/v1/layers/traversee"
         type="geojson"
         visible="true"
         queryable="true"
@@ -114,7 +114,7 @@
       <layer
         id="obstacles"
         name="Obstacles (3017)"
-        url="/api/v1/layers/v_obstacles?limit=5000"
+        url="https://hermes58.alwaysdata.net/api/v1/layers/v_obstacles?limit=5000"
         type="geojson"
         visible="true"
         queryable="true"
@@ -129,7 +129,7 @@
       <layer
         id="circulation"
         name="Zones de circulation (585)"
-        url="/api/v1/layers/circulation"
+        url="https://hermes58.alwaysdata.net/api/v1/layers/circulation"
         type="geojson"
         visible="false"
         queryable="true"
@@ -150,7 +150,7 @@
       <layer
         id="escaliers"
         name="Escaliers (15)"
-        url="/api/v1/layers/escalier"
+        url="https://hermes58.alwaysdata.net/api/v1/layers/escalier"
         type="geojson"
         visible="true"
         queryable="true"
@@ -164,7 +164,7 @@
       <layer
         id="rampes"
         name="Rampes (28)"
-        url="/api/v1/layers/rampe"
+        url="https://hermes58.alwaysdata.net/api/v1/layers/rampe"
         type="geojson"
         visible="true"
         queryable="true"
@@ -178,7 +178,7 @@
       <layer
         id="quais"
         name="Quais (58)"
-        url="/api/v1/layers/quai"
+        url="https://hermes58.alwaysdata.net/api/v1/layers/quai"
         type="geojson"
         visible="false"
         queryable="true"
@@ -192,7 +192,7 @@
       <layer
         id="passage_selectif"
         name="Passages sélectifs (1)"
-        url="/api/v1/layers/passage_selectif"
+        url="https://hermes58.alwaysdata.net/api/v1/layers/passage_selectif"
         type="geojson"
         visible="true"
         queryable="true"
@@ -213,7 +213,7 @@
       <layer
         id="stationnements_pmr"
         name="Stationnements PMR (46)"
-        url="/api/v1/layers/stationnement_pmr"
+        url="https://hermes58.alwaysdata.net/api/v1/layers/stationnement_pmr"
         type="geojson"
         visible="true"
         queryable="true"
@@ -235,7 +235,7 @@
       <layer
         id="entrees"
         name="Entrées ERP (89)"
-        url="/api/v1/layers/entree"
+        url="https://hermes58.alwaysdata.net/api/v1/layers/entree"
         type="geojson"
         visible="true"
         queryable="true"
