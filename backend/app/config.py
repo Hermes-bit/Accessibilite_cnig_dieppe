@@ -3,8 +3,8 @@ from datetime import timedelta
 
 
 class BaseConfig:
-    SECRET_KEY = os.environ["SECRET_KEY"]
-    JWT_SECRET_KEY = os.environ["JWT_SECRET_KEY"]
+    SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-change-in-prod")
+    JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "dev-jwt-change-in-prod")
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
 
@@ -40,7 +40,7 @@ class DevelopmentConfig(BaseConfig):
 
 class ProductionConfig(BaseConfig):
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = os.environ["DATABASE_URL"]
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "")
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Strict"

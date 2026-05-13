@@ -37,8 +37,11 @@ def create_app(config_name: str = "development") -> Flask:
 
     # Ensure app_users table exists (public schema, separate from CNIG schema)
     with app.app_context():
-        from .models.user import AppUser  # noqa: F401
-        db.create_all()
+        try:
+            from .models.user import AppUser  # noqa: F401
+            db.create_all()
+        except Exception as exc:
+            app.logger.warning(f"db.create_all() ignoré au démarrage : {exc}")
 
     from .api import api_bp
     from .auth import auth_bp
