@@ -42,7 +42,7 @@ jobs:
 
       - name: Lint (flake8)
         working-directory: backend
-        run: flake8 app/ --max-line-length=100 --extend-ignore=E203
+        run: flake8 app/
 
       - name: Format check (black)
         working-directory: backend

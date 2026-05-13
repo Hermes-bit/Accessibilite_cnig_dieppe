@@ -32,7 +32,7 @@ jobs:
           path: bandit-report.json
 
   dependency-audit:
-    name: Dependency Audit (Safety)
+    name: Dependency Audit (pip-audit)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -42,12 +42,19 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install Safety
-        run: pip install safety
+      - name: Install pip-audit
+        run: pip install pip-audit
 
       - name: Audit dependencies
         working-directory: backend
-        run: safety check -r requirements.txt --full-report
+        run: pip-audit -r requirements.txt --output json -o pip-audit-report.json || pip-audit -r requirements.txt
+
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pip-audit-report
+          path: backend/pip-audit-report.json
 
   docker-scan:
     name: Docker Image Scan (Trivy)
