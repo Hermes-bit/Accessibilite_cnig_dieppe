@@ -555,3 +555,79 @@
 .ua-active-toggle:checked::after {
   transform: translateX(16px);
 }
+
+/* ── Responsive mobile ─────────────────────────────────── */
+@media (max-width: 767px) {
+
+  /* Masquer le badge de rôle sur mobile pour gagner de la place */
+  #ua-user-chip .ua-badge {
+    display: none;
+  }
+
+  /* Chip plus compact */
+  #ua-user-chip > a.ua-chip-toggle {
+    padding: 4px 6px;
+    gap: 4px;
+  }
+
+  /* Modal login plein écran sur très petit écran */
+  #ua-modal {
+    width: calc(100vw - 24px);
+    margin: 0 12px;
+  }
+
+  #ua-modal-body {
+    padding: 20px 18px;
+  }
+
+  /* Panel admin plein écran */
+  #ua-admin-inner {
+    width: calc(100vw - 16px);
+    max-height: calc(100vh - 16px);
+    border-radius: 8px;
+  }
+
+  #ua-admin-body {
+    padding: 12px;
+    overflow-x: auto;
+  }
+
+  /* Table admin scrollable horizontalement */
+  #ua-admin-table {
+    font-size: 12px;
+    min-width: 480px;
+  }
+
+  #ua-admin-table th,
+  #ua-admin-table td {
+    padding: 8px 8px;
+  }
+
+  /* Menu dropdown chip : s'ouvre à gauche sur mobile */
+  .ua-chip-menu {
+    right: auto;
+    left: 0;
+    min-width: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Réduire la taille du modal header */
+  #ua-modal-header {
+    padding: 16px 18px 14px;
+  }
+
+  #ua-modal-header h2 {
+    font-size: 15px;
+  }
+
+  #ua-modal-header .ua-logo-icon {
+    font-size: 26px;
+  }
+
+  /* Boutons full width */
+  .ua-btn {
+    padding: 12px 14px;
+    font-size: 15px;
+  }
+}
