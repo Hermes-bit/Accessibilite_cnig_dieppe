@@ -24,22 +24,22 @@ jobs:
 
       - name: Injecter les fichiers CNIG
         run: |
-          echo "=== Contenu _site/ après clone ==="
-          ls _site/
-          echo "=== Contenu _site/apps/ ==="
-          ls _site/apps/ 2>/dev/null || echo "DOSSIER apps/ ABSENT"
           mkdir -p _site/apps
-          cp -r mviewer/apps/* _site/apps/
+          cp -r mviewer/apps/. _site/apps/
           cp mviewer/config/cnig_accessibilite.xml _site/apps/cnig_accessibilite.xml
           sed -i 's|url="/api/v1/|url="https://hermes58.alwaysdata.net/api/v1/|g' \
             _site/apps/cnig_accessibilite.xml
-          echo "=== Vérification fichier XML ==="
           ls -la _site/apps/cnig_accessibilite.xml
-          head -5 _site/apps/cnig_accessibilite.xml
 
       - name: Déployer sur GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./_site
-          publish_branch: gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          touch _site/.nojekyll
+          cd _site
+          git init
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "deploy mviewer"
+          git push --force "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git" HEAD:gh-pages
