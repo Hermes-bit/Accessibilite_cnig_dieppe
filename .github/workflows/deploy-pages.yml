@@ -20,7 +20,7 @@ jobs:
       - name: Cloner mviewer (core)
         run: |
           git clone --depth 1 --branch master https://github.com/mviewer/mviewer.git _site
-          rm -rf _site/.git _site/demo _site/docs
+          rm -rf _site/.git _site/.github _site/demo _site/docs
 
       - name: Injecter les fichiers CNIG
         run: |
