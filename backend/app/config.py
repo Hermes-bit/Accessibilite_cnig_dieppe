@@ -38,9 +38,21 @@ class DevelopmentConfig(BaseConfig):
     RATELIMIT_DEFAULT = "10000 per day;1000 per hour"
 
 
+def _build_db_url():
+    """Construit la DATABASE_URL depuis DB_USER/DB_PASS/DB_HOST/DB_NAME si DATABASE_URL absent."""
+    url = os.environ.get("DATABASE_URL", "")
+    if not url:
+        user = os.environ.get("DB_USER", "hermes58")
+        pw   = os.environ.get("DB_PASS", "")
+        host = os.environ.get("DB_HOST", "postgresql-hermes58.alwaysdata.net")
+        name = os.environ.get("DB_NAME", "hermes58_a4")
+        url  = f"postgresql://{user}:{pw}@{host}:5432/{name}"
+    return url
+
+
 class ProductionConfig(BaseConfig):
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "")
+    SQLALCHEMY_DATABASE_URI = _build_db_url()
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Strict"
