@@ -36,6 +36,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           touch _site/.nojekyll
+          rm -f _site/.gitignore
           cd _site
           git init
           git config user.name "github-actions[bot]"
