@@ -125,6 +125,7 @@
 .dbe-table-item i { font-size: 11px; color: #4a90d9; width: 13px; text-align: center; flex-shrink: 0; }
 .dbe-table-item .dbe-tname { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
 
+
 #dbe-context-menu {
     position: fixed;
     z-index: 9999;

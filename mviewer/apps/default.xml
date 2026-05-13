@@ -26,38 +26,7 @@
     <extension type="javascript" src="apps/tour/tour.js"/>
   </extensions>
 
-  <baselayers style="default">
-
-    <!-- OpenStreetMap standard -->
-    <baselayer
-      type="OSM"
-      label="OpenStreetMap"
-      title="Fond de plan OpenStreetMap"
-      visible="true"
-      thumbnail="https://tile.openstreetmap.org/13/4120/2786.png"
-    />
-
-    <!-- Fond clair CartoDB — idéal pour la lisibilité des données -->
-    <baselayer
-      type="OSM"
-      label="Fond clair"
-      title="CartoDB Positron — fond clair"
-      url="https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
-      visible="false"
-      thumbnail="https://a.basemaps.cartocdn.com/light_all/13/4120/2786.png"
-    />
-
-    <!-- Imagerie satellite Esri -->
-    <baselayer
-      type="OSM"
-      label="Satellite"
-      title="Esri World Imagery — vue satellite"
-      url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-      visible="false"
-      thumbnail="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/13/2786/4120"
-    />
-
-  </baselayers>
+  <baselayers style="default"/>
 
   <themes>
 

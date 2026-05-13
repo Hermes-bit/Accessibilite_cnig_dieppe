@@ -428,10 +428,7 @@
         return;
       }
       if (data.dev_password) {
-        var pwdHtml = "<br><span style='font-family:monospace;font-size:17px;font-weight:700;"
-          + "letter-spacing:3px;color:#1a3a5c;display:block;margin-top:6px;text-align:center'>"
-          + _escHtml(data.dev_password) + "</span>";
-        _showSuccess(fromStep || 1, (data.message || "") + pwdHtml);
+        _showSuccess(fromStep || 1, data.message || "Un mot de passe temporaire a été généré et placé dans le champ mot de passe.");
         document.getElementById("ua-password").value = data.dev_password;
       } else {
         _showSuccess(fromStep || 1, data.message || "Un mot de passe temporaire vous a été envoyé par e-mail.");

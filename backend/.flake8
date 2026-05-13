@@ -1,0 +1,5 @@
+[flake8]
+max-line-length = 120
+extend-ignore = E203, E221
+per-file-ignores =
+    app/utils/email_service.py: E501

@@ -34,7 +34,7 @@
       label="OpenStreetMap"
       title="Fond de plan OpenStreetMap"
       visible="true"
-      thumbnail="https://tile.openstreetmap.org/14/8241/5588.png"
+      thumbnail="https://tile.openstreetmap.org/14/8235/5551.png"
     />
 
     <!-- Fond clair CartoDB -->
@@ -44,7 +44,7 @@
       title="CartoDB Positron — fond clair"
       url="https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
       visible="false"
-      thumbnail="https://a.basemaps.cartocdn.com/light_all/14/8241/5588.png"
+      thumbnail="https://a.basemaps.cartocdn.com/light_all/14/8235/5551.png"
     />
 
     <!-- Imagerie satellite Esri -->
@@ -54,7 +54,7 @@
       title="Esri World Imagery — vue satellite"
       url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
       visible="false"
-      thumbnail="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/14/5588/8241"
+      thumbnail="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/14/5551/8235"
     />
 
   </baselayers>
