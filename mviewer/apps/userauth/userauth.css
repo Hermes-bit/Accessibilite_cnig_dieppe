@@ -559,6 +559,16 @@
 /* ── Responsive mobile ─────────────────────────────────── */
 @media (max-width: 767px) {
 
+  /* Masquer les labels texte des boutons navbar — garder seulement l'icône */
+  .mv-btn-label {
+    display: none;
+  }
+
+  /* Boutons navbar plus compacts (icône seule) */
+  .mv-navbar-btn {
+    padding: 6px 10px;
+  }
+
   /* Masquer le badge de rôle sur mobile pour gagner de la place */
   #ua-user-chip .ua-badge {
     display: none;

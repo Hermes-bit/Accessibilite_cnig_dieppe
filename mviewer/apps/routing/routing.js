@@ -137,7 +137,7 @@ const RoutingComponent = (function () {
         li.className = "ms-2";
         li.id = "routing-nav-item";
         li.innerHTML = `<button id="routing-fab" class="btn btn-light mv-navbar-btn" title="Calcul d'itinéraire accessible">
-            <i class="fas fa-route"></i> Itinéraire
+            <i class="fas fa-route"></i><span class="mv-btn-label"> Itinéraire</span>
         </button>`;
 
         const navRight = document.querySelector("ul.nav.navbar-nav.navbar-right") ||

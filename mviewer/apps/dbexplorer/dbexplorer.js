@@ -14,6 +14,7 @@ const DbExplorer = (function () {
     let _activeTable    = null;
     const _mapLayers    = {};
     const _styleConfigs = {};
+    let _importGroupLayer = null;
     const _protectedTables = new Set([
         "v_troncons", "v_obstacles", "v_erp",
         "troncon_cheminement", "noeud_cheminement", "obstacle",
@@ -157,6 +158,19 @@ const DbExplorer = (function () {
         return window.mviewer && window.mviewer.getMap && window.mviewer.getMap();
     }
 
+    function _getImportGroup(map) {
+        if (_importGroupLayer) return _importGroupLayer;
+        const group = new window.ol.layer.Group({
+            layers: [],
+        });
+        group.set("title", "Couches importées");
+        group.set("dbeImportGroup", true);
+        group.setVisible(true);
+        map.addLayer(group);
+        _importGroupLayer = group;
+        return _importGroupLayer;
+    }
+
     function _buildMapStyle(tableName) {
         const cfg = _styleConfigs[tableName] || { type: "auto", color: "#ff5722", width: 3, size: 6, fill: "rgba(255,87,34,0.25)" };
         const color = cfg.color || "#ff5722";
@@ -193,6 +207,32 @@ const DbExplorer = (function () {
         };
     }
 
+    function _buildClusterStyle(feature) {
+        const size = feature.get('features') ? feature.get('features').length : 1;
+        if (size > 1) {
+            return new window.ol.style.Style({
+                image: new window.ol.style.Circle({
+                    radius: 12,
+                    fill: new window.ol.style.Fill({ color: '#1f77b4' }),
+                    stroke: new window.ol.style.Stroke({ color: '#ffffff', width: 2 }),
+                }),
+                text: new window.ol.style.Text({
+                    text: String(size),
+                    fill: new window.ol.style.Fill({ color: '#ffffff' }),
+                    stroke: new window.ol.style.Stroke({ color: '#1f77b4', width: 3 }),
+                    font: 'bold 12px sans-serif',
+                }),
+            });
+        }
+        return new window.ol.style.Style({
+            image: new window.ol.style.Circle({
+                radius: 6,
+                fill: new window.ol.style.Fill({ color: '#1f77b4' }),
+                stroke: new window.ol.style.Stroke({ color: '#ffffff', width: 1.5 }),
+            }),
+        });
+    }
+
     function _addLayerToMap(tableName) {
         const map = _getMap();
         if (!map || !window.ol) {
@@ -205,6 +245,8 @@ const DbExplorer = (function () {
             return;
         }
 
+        const importGroup = _getImportGroup(map);
+
         const source = new window.ol.source.Vector({
             format: new window.ol.format.GeoJSON(),
             loader: function (extent, resolution, projection) {
@@ -216,27 +258,75 @@ const DbExplorer = (function () {
                             featureProjection: projection,
                         });
                         source.addFeatures(features);
+                        const extent = source.getExtent();
+                        if (extent && !window.ol.extent.isEmpty(extent)) {
+                            map.getView().fit(extent, { duration: 400, padding: [40, 40, 40, 40], maxZoom: 16 });
+                        }
+                        _applyClusterIfNeeded(tableName, source, importGroup);
                     })
                     .catch(() => _showStatusMsg(`Impossible de charger la couche ${tableName}.`, "err"));
             },
         });
 
-        const layer = new window.ol.layer.Vector({
+        const vectorLayer = new window.ol.layer.Vector({
             source: source,
             style: _buildMapStyle(tableName),
         });
-        layer.set("dbeTableName", tableName);
-        layer.set("title", tableName);
-        map.addLayer(layer);
-        _mapLayers[tableName] = layer;
-        _showStatusMsg(`Couche ${tableName} ajoutée à la carte.`, "ok");
+        vectorLayer.set("dbeTableName", tableName);
+        vectorLayer.set("title", tableName);
+        vectorLayer.set("mviewerid", `import_${tableName}`);
+
+        importGroup.getLayers().push(vectorLayer);
+        _mapLayers[tableName] = vectorLayer;
+        _showStatusMsg(`Couche importée ${tableName} ajoutée au groupe d'import.`, "ok");
+
+        function _applyClusterIfNeeded(tableName, source, groupLayer) {
+            const features = source.getFeatures();
+            if (!features.length) return;
+            const geometry = features[0].getGeometry();
+            if (!geometry || geometry.getType() !== 'Point') return;
+
+            const clusterSource = new window.ol.source.Cluster({
+                distance: 32,
+                source: source,
+            });
+            const clusterLayer = new window.ol.layer.Vector({
+                source: clusterSource,
+                style: _buildClusterStyle,
+            });
+            clusterLayer.set("dbeTableName", tableName);
+            clusterLayer.set("title", tableName);
+            clusterLayer.set("mviewerid", `import_${tableName}`);
+
+            const layers = groupLayer.getLayers();
+            for (let i = 0; i < layers.getLength(); i++) {
+                const layer = layers.item(i);
+                if (layer.get("dbeTableName") === tableName) {
+                    layers.removeAt(i);
+                    layers.insertAt(i, clusterLayer);
+                    break;
+                }
+            }
+            _mapLayers[tableName] = clusterLayer;
+        }
     }
 
     function _removeLayerFromMap(tableName) {
         const map = _getMap();
         const layer = _mapLayers[tableName];
         if (!map || !layer) return;
-        map.removeLayer(layer);
+
+        const importGroup = _importGroupLayer;
+        if (importGroup && importGroup.getLayers().getArray().includes(layer)) {
+            importGroup.getLayers().remove(layer);
+            if (importGroup.getLayers().getLength() === 0) {
+                map.removeLayer(importGroup);
+                _importGroupLayer = null;
+            }
+        } else {
+            map.removeLayer(layer);
+        }
+
         delete _mapLayers[tableName];
         _showStatusMsg(`Couche ${tableName} retirée de la carte.`, "info");
     }
@@ -525,7 +615,7 @@ const DbExplorer = (function () {
         li.className = "ms-2";
         li.id = "dbe-nav-item";
         li.innerHTML = `<button id="dbe-nav-btn" class="btn btn-light mv-navbar-btn" title="Explorateur de base de données">
-            <i class="fas fa-database"></i> Base de données
+            <i class="fas fa-database"></i><span class="mv-btn-label"> Base de données</span>
         </button>`;
         const navRight = document.querySelector("ul.nav.navbar-nav.navbar-right") ||
                          document.querySelector("ul.navbar-nav.navbar-right") ||
