@@ -1,3 +1,4 @@
+import json
 import re
 
 from flask import jsonify, request
@@ -13,6 +14,7 @@ from app.models import (
     PassageSelectif, Quai, StationnementPmr, TapisRoulant,
     Erp, VErp, Entree,
 )
+from app.models.base import _clean_value
 from . import api_bp
 
 
@@ -120,8 +122,18 @@ def _bbox_filter(model, bbox_str: str):
     return ST_Within(model.geom, envelope)
 
 
-def _build_geojson(rows):
-    features = [row.as_geojson_feature() for row in rows]
+def _build_geojson_from_orm(rows):
+    """Construit un FeatureCollection depuis des tuples (modèle, geojson_str)."""
+    features = []
+    for obj, geojson_str in rows:
+        geom_field = obj._geometry_field()
+        properties = {
+            col.name: _clean_value(getattr(obj, col.name))
+            for col in obj.__table__.columns
+            if col.name != geom_field
+        }
+        geometry = json.loads(geojson_str) if geojson_str else None
+        features.append({"type": "Feature", "geometry": geometry, "properties": properties})
     return {
         "type": "FeatureCollection",
         "features": features,
@@ -143,13 +155,16 @@ def get_layer(layer_name: str):
     offset = int(request.args.get("offset", 0))
 
     if model is not None:
-        query = db.session.query(model)
+        query = db.session.query(
+            model,
+            func.ST_AsGeoJSON(func.ST_Transform(model.geom, 4326)).label("_geojson"),
+        )
         if bbox:
             sf = _bbox_filter(model, bbox)
             if sf is not None:
                 query = query.filter(sf)
         rows = query.limit(limit).offset(offset).all()
-        return jsonify(_build_geojson(rows))
+        return jsonify(_build_geojson_from_orm(rows))
 
     if not _valid_identifier(layer_name):
         return jsonify({"error": f"Couche '{layer_name}' introuvable"}), 404
@@ -169,11 +184,23 @@ def get_feature(layer_name: str, feature_id: str):
         return jsonify({"error": f"Couche '{layer_name}' introuvable"}), 404
 
     pk_col = model.__table__.primary_key.columns.values()[0]
-    row = db.session.query(model).filter(pk_col == feature_id).first()
+    row = db.session.query(
+        model,
+        func.ST_AsGeoJSON(func.ST_Transform(model.geom, 4326)).label("_geojson"),
+    ).filter(pk_col == feature_id).first()
+
     if row is None:
         return jsonify({"error": "Entité introuvable"}), 404
 
-    return jsonify(row.as_geojson_feature())
+    obj, geojson_str = row
+    geom_field = obj._geometry_field()
+    properties = {
+        col.name: _clean_value(getattr(obj, col.name))
+        for col in obj.__table__.columns
+        if col.name != geom_field
+    }
+    geometry = json.loads(geojson_str) if geojson_str else None
+    return jsonify({"type": "Feature", "geometry": geometry, "properties": properties})
 
 
 @api_bp.route("/stats", methods=["GET"])
