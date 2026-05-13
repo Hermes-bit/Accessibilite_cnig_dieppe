@@ -1,4 +1,5 @@
 import json
+import math
 import re
 
 from flask import jsonify, request
@@ -122,6 +123,42 @@ def _bbox_filter(model, bbox_str: str):
     return ST_Within(model.geom, envelope)
 
 
+def _is_nan_pt(pt):
+    return any(isinstance(v, float) and math.isnan(v) for v in pt)
+
+
+def _clean_geometry(geom):
+    """Supprime les points NaN et les coordonnées Z pour compatibilité mviewer."""
+    if not geom:
+        return None
+    t = geom.get("type")
+    c = geom.get("coordinates")
+    if c is None:
+        return geom
+    if t == "Point":
+        return None if _is_nan_pt(c) else {"type": "Point", "coordinates": c[:2]}
+    if t == "MultiPoint":
+        pts = [p[:2] for p in c if not _is_nan_pt(p)]
+        return {"type": "MultiPoint", "coordinates": pts} if pts else None
+    if t == "LineString":
+        pts = [p[:2] for p in c if not _is_nan_pt(p)]
+        return {"type": "LineString", "coordinates": pts} if len(pts) >= 2 else None
+    if t == "MultiLineString":
+        lines = [[p[:2] for p in ln if not _is_nan_pt(p)] for ln in c]
+        lines = [ln for ln in lines if len(ln) >= 2]
+        return {"type": "MultiLineString", "coordinates": lines} if lines else None
+    if t == "Polygon":
+        rings = [[p[:2] for p in r if not _is_nan_pt(p)] for r in c]
+        rings = [r for r in rings if len(r) >= 4]
+        return {"type": "Polygon", "coordinates": rings} if rings else None
+    if t == "MultiPolygon":
+        polys = [[[p[:2] for p in r if not _is_nan_pt(p)] for r in poly] for poly in c]
+        polys = [[r for r in poly if len(r) >= 4] for poly in polys]
+        polys = [poly for poly in polys if poly]
+        return {"type": "MultiPolygon", "coordinates": polys} if polys else None
+    return geom
+
+
 def _build_geojson_from_orm(rows):
     """Construit un FeatureCollection depuis des tuples (modèle, geojson_str)."""
     features = []
@@ -132,7 +169,7 @@ def _build_geojson_from_orm(rows):
             for col in obj.__table__.columns
             if col.name != geom_field
         }
-        geometry = json.loads(geojson_str) if geojson_str else None
+        geometry = _clean_geometry(json.loads(geojson_str)) if geojson_str else None
         features.append({"type": "Feature", "geometry": geometry, "properties": properties})
     return {
         "type": "FeatureCollection",
