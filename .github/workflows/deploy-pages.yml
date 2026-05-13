@@ -33,7 +33,7 @@ jobs:
           cp -r mviewer/apps/* _site/apps/
           cp mviewer/config/cnig_accessibilite.xml _site/apps/cnig_accessibilite.xml
           # Remplace les URLs relatives par l'URL absolue de l'API en production
-          sed -i 's|url="/api/v1/|url="https://hermes58.alwaysdata.net/api/v1/|g' \
+          sed -i 's|url="/api/v1/|url="https://cnigaccessibilitedieppe.com/api/v1/|g' \
             _site/apps/cnig_accessibilite.xml
 
       - uses: actions/upload-pages-artifact@v3
