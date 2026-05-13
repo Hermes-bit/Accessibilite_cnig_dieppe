@@ -29,6 +29,8 @@ jobs:
           cp mviewer/config/cnig_accessibilite.xml _site/apps/cnig_accessibilite.xml
           sed -i 's|url="/api/v1/|url="https://hermes58.alwaysdata.net/api/v1/|g' \
             _site/apps/cnig_accessibilite.xml
+          sed -i 's|var API_BASE = "/auth"|var API_BASE = "https://hermes58.alwaysdata.net/auth"|g' \
+            _site/apps/userauth/userauth.js
           ls -la _site/apps/cnig_accessibilite.xml
 
       - name: Déployer sur GitHub Pages
