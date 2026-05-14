@@ -362,6 +362,14 @@
 }
 
 /* ── Sidebar mobile — boutons plugin à gauche ─────────── */
+@media (max-width: 767px) {
+  #dbe-nav-item,
+  #routing-nav-item,
+  #fb-nav-item {
+    display: none !important;
+  }
+}
+
 #mv-plugin-sidebar {
   position: fixed;
   left: 10px;
@@ -370,52 +378,56 @@
   z-index: 1000;
   display: none;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
 }
 
 @media (max-width: 767px) {
   #mv-plugin-sidebar {
     display: flex;
   }
+}
 
-  #mv-plugin-sidebar li {
-    list-style: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
+.mv-sidebar-wrap {
+  position: relative;
+}
 
-  #mv-plugin-sidebar .mv-navbar-btn {
-    width: 38px !important;
-    height: 38px !important;
-    min-width: 38px !important;
-    padding: 0 !important;
-    background: rgba(255, 255, 255, 0.88) !important;
-    border: none !important;
-    border-radius: 4px !important;
-    color: #333 !important;
-    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.28) !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    transform: none !important;
-    transition: background 0.15s !important;
-  }
+.mv-sidebar-btn {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.88);
+  border: none;
+  border-radius: 4px;
+  color: #333;
+  font-size: 16px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+  position: relative;
+}
 
-  #mv-plugin-sidebar .mv-navbar-btn:hover {
-    background: rgba(255, 255, 255, 1) !important;
-    transform: none !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
-  }
+.mv-sidebar-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
 
-  #mv-plugin-sidebar .mv-btn-label {
-    display: none !important;
-  }
-
-  #mv-plugin-sidebar .mv-navbar-btn i {
-    font-size: 16px !important;
-    opacity: 0.85;
-    color: #333 !important;
-  }
+.mv-sidebar-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
 }
 
 /* ── Mobile — panel feedback ──────────────────────────── */
