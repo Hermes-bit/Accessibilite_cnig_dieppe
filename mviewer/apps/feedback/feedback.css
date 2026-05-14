@@ -378,7 +378,7 @@
 #mv-plugin-sidebar {
   position: fixed;
   left: 16px;
-  top: 60px;
+  top: 62px;
   z-index: 1000;
   display: none;
   flex-direction: column;
@@ -396,8 +396,8 @@
 }
 
 .mv-sidebar-btn {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   background: #ffffff;
   border: none;
   border-bottom: 0.5px solid rgba(0, 0, 0, 0.15);
