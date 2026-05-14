@@ -335,7 +335,7 @@
   }
 
   /* ── Navbar injection ───────────────────────────────────── */
-  function _injectNavButton(isAdmin) {
+  function _injectNavButton(isAdmin, hasQC) {
     _isAdmin = isAdmin;
 
     var li = document.createElement("li");
@@ -362,8 +362,8 @@
         }
         document.getElementById("fb-nav-btn").addEventListener("click", _openPanel);
 
-        /* Admin: show unresolved badge */
-        if (isAdmin) {
+        /* Badge pour tous les utilisateurs avec controle_qualite */
+        if (hasQC) {
           _loadBadgeCount();
           setInterval(_loadBadgeCount, 60000);
         }
@@ -408,7 +408,7 @@
   }
 
   /* ── Sidebar mobile (boutons plugin à gauche) ──────────── */
-  function _setupMobileSidebar() {
+  function _setupMobileSidebar(perms) {
     if (window.innerWidth > 767) return;
 
     var tablerLink = document.createElement("link");
@@ -417,11 +417,17 @@
       "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css";
     document.head.appendChild(tablerLink);
 
-    var BTNS = [
-      { targetId: "dbe-nav-btn", icon: "ti-database",       label: "Base de données" },
-      { targetId: "routing-fab", icon: "ti-route",           label: "Itinéraire" },
-      { targetId: "fb-nav-btn",  icon: "ti-clipboard-check", label: "Recettage", badgeId: "fb-count-badge" },
-    ];
+    var hasEdit = perms.indexOf("edition_donnees") !== -1;
+    var hasQC   = perms.indexOf("controle_qualite") !== -1;
+
+    var BTNS = [];
+    if (hasEdit) {
+      BTNS.push({ targetId: "dbe-nav-btn", icon: "ti-database", label: "Base de données" });
+    }
+    BTNS.push({ targetId: "routing-fab", icon: "ti-route", label: "Itinéraire" });
+    if (hasQC) {
+      BTNS.push({ targetId: "fb-nav-btn", icon: "ti-clipboard-check", label: "Recettage", badgeId: "fb-count-badge" });
+    }
 
     var sidebar = document.createElement("div");
     sidebar.id = "mv-plugin-sidebar";
@@ -474,18 +480,15 @@
   function _init() {
     _buildPanel();
     _getCurrentUser(function (user) {
+      var perms = (user && user.permissions) || [];
       var isAdmin = user && user.user_type === "admin";
-      _injectNavButton(isAdmin);
-      if (isAdmin) {
+      var hasQC = perms.indexOf("controle_qualite") !== -1;
+      if (hasQC) {
+        _injectNavButton(isAdmin, hasQC);
         _enableAdminTab();
-      } else {
-        if (user) {
-          var rg = document.getElementById("fb-reporter-group");
-          if (rg) rg.style.display = "none";
-        }
       }
+      _setupMobileSidebar(perms);
     });
-    _setupMobileSidebar();
   }
 
   /* Start after mviewer is ready */

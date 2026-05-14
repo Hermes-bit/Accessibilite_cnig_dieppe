@@ -145,7 +145,16 @@
 
     var initial = (user.display_name || user.email || "?").charAt(0).toUpperCase();
     var label   = user.display_name || user.email.split("@")[0];
-    var type    = user.user_type || "viewer";
+    var type    = user.user_type || "association_pmr";
+    var _ROLE_LABELS = {
+      admin: "Admin",
+      agent_sig: "Agent SIG",
+      agent_voirie: "Agent voirie",
+      agent_collectivite: "Collectivité",
+      prestataire: "Prestataire",
+      association_pmr: "Asso. PMR",
+    };
+    var typeLabel = _ROLE_LABELS[type] || type;
 
     var li = document.createElement("li");
     li.id = "ua-user-chip";
@@ -154,7 +163,7 @@
     li.innerHTML = [
       '<a href="#" class="ua-chip-toggle" id="ua-chip-toggle" title="' + _escHtml(user.email) + '">',
       '  <span class="ua-avatar">' + _escHtml(initial) + '</span>',
-      '  <span class="ua-badge ua-badge-' + type + '">' + _escHtml(type) + '</span>',
+      '  <span class="ua-badge ua-badge-' + type + '">' + _escHtml(typeLabel) + '</span>',
       '</a>',
       '<div class="ua-chip-menu" id="ua-chip-menu">',
       (type === "admin"
@@ -530,7 +539,7 @@
     _hideOverlay();
     if (_currentUser) {
       _buildUserChip(_currentUser);
-      _applyRoleRestrictions(_currentUser.user_type);
+      _applyRoleRestrictions(_currentUser);
       document.dispatchEvent(new CustomEvent("cnig:login", { detail: _currentUser }));
     }
   }
@@ -573,16 +582,12 @@
   ================================================================ */
   var _hiddenNavItems = [];
 
-  function _applyRoleRestrictions(userType) {
-    _restoreNavItems(); // always start clean
-
-    if (userType === "viewer") {
-      _hideNavItem("routing-nav-item");
+  function _applyRoleRestrictions(user) {
+    _restoreNavItems();
+    var perms = (user && user.permissions) || [];
+    if (perms.indexOf("edition_donnees") === -1) {
       _hideNavItem("dbe-nav-item");
-    } else if (userType === "editor") {
-      _hideNavItem("routing-nav-item");
     }
-    // creator + admin: nothing hidden
   }
 
   function _hideNavItem(id) {
@@ -657,10 +662,12 @@
         "<td>" + _escHtml(user.display_name || "—") + "</td>",
         "<td>",
         '  <select class="ua-type-select" data-uid="' + user.id + '" data-field="user_type">',
-        '    <option value="viewer"'  + (user.user_type === "viewer"  ? " selected" : "") + ">Viewer</option>",
-        '    <option value="editor"'  + (user.user_type === "editor"  ? " selected" : "") + ">Editor</option>",
-        '    <option value="creator"' + (user.user_type === "creator" ? " selected" : "") + ">Creator</option>",
-        '    <option value="admin"'   + (user.user_type === "admin"   ? " selected" : "") + ">Admin</option>",
+        '    <option value="admin"'              + (user.user_type === "admin"              ? " selected" : "") + ">Administrateur</option>",
+        '    <option value="agent_sig"'          + (user.user_type === "agent_sig"          ? " selected" : "") + ">Agent SIG</option>",
+        '    <option value="agent_voirie"'       + (user.user_type === "agent_voirie"       ? " selected" : "") + ">Agent voirie</option>",
+        '    <option value="agent_collectivite"' + (user.user_type === "agent_collectivite" ? " selected" : "") + ">Agent collectivité</option>",
+        '    <option value="prestataire"'        + (user.user_type === "prestataire"        ? " selected" : "") + ">Prestataire</option>",
+        '    <option value="association_pmr"'    + (user.user_type === "association_pmr"    ? " selected" : "") + ">Association PMR</option>",
         "  </select>",
         "</td>",
         "<td>",
@@ -741,7 +748,7 @@
     .then(function (user) {
       _currentUser = user;
       _buildUserChip(user);
-      _applyRoleRestrictions(user.user_type);
+      _applyRoleRestrictions(user);
       if (user.first_login) {
         _showStep(3);
         _showOverlay();

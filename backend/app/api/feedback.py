@@ -4,6 +4,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_req
 from app import db, limiter
 from app.models.feedback import Feedback
 from app.models.user import AppUser
+from app.utils.permissions import has_permission
 from . import api_bp
 
 _SEVERITIES = {"bloquant", "majeur", "mineur", "amelioration"}
@@ -68,8 +69,8 @@ def submit_feedback():
 def list_feedback():
     identity = get_jwt_identity()
     user = AppUser.query.filter_by(email=identity).first()
-    if not user or user.user_type != "admin":
-        return jsonify({"error": "Accès réservé aux administrateurs"}), 403
+    if not user or not has_permission(user.user_type, "controle_qualite"):
+        return jsonify({"error": "Accès non autorisé"}), 403
 
     status_filter = request.args.get("status")
     query = Feedback.query.order_by(Feedback.created_at.desc())
@@ -85,8 +86,8 @@ def list_feedback():
 def update_feedback(fb_id):
     identity = get_jwt_identity()
     user = AppUser.query.filter_by(email=identity).first()
-    if not user or user.user_type != "admin":
-        return jsonify({"error": "Accès réservé aux administrateurs"}), 403
+    if not user or not has_permission(user.user_type, "controle_qualite"):
+        return jsonify({"error": "Accès non autorisé"}), 403
 
     fb = Feedback.query.get(fb_id)
     if not fb:
