@@ -693,9 +693,23 @@
   ================================================================ */
   var _hiddenNavItems = [];
 
+  var _DEFAULT_PERMS = {
+    admin:              ["backoffice","gestion_comptes","edition_donnees","generation_carto","consultation_carto","mode_presentation","controle_qualite"],
+    agent_sig:          ["edition_donnees","generation_carto","consultation_carto","mode_presentation","controle_qualite"],
+    agent_voirie:       ["edition_donnees","consultation_carto","mode_presentation","controle_qualite"],
+    agent_collectivite: ["consultation_carto","mode_presentation"],
+    prestataire:        ["edition_donnees","consultation_carto"],
+    association_pmr:    ["consultation_carto","mode_presentation"],
+  };
+
+  function _resolvePerms(user) {
+    if (user && user.permissions && user.permissions.length > 0) return user.permissions;
+    return _DEFAULT_PERMS[user && user.user_type] || [];
+  }
+
   function _applyRoleRestrictions(user) {
     _restoreNavItems();
-    var perms = (user && user.permissions) || [];
+    var perms = _resolvePerms(user);
     if (perms.indexOf("edition_donnees") === -1) {
       _hideNavItem("dbe-nav-item");
     }

@@ -477,17 +477,28 @@
   }
 
   /* ── Init ───────────────────────────────────────────────── */
+  var _DEFAULT_PERMS_FB = {
+    admin:              ["backoffice","gestion_comptes","edition_donnees","generation_carto","consultation_carto","mode_presentation","controle_qualite"],
+    agent_sig:          ["edition_donnees","generation_carto","consultation_carto","mode_presentation","controle_qualite"],
+    agent_voirie:       ["edition_donnees","consultation_carto","mode_presentation","controle_qualite"],
+    agent_collectivite: ["consultation_carto","mode_presentation"],
+    prestataire:        ["edition_donnees","consultation_carto"],
+    association_pmr:    ["consultation_carto","mode_presentation"],
+  };
+
   function _init() {
     _buildPanel();
     _getCurrentUser(function (user) {
-      var perms = (user && user.permissions) || [];
+      var raw = (user && user.permissions && user.permissions.length > 0)
+        ? user.permissions
+        : (_DEFAULT_PERMS_FB[user && user.user_type] || []);
       var isAdmin = user && user.user_type === "admin";
-      var hasQC = perms.indexOf("controle_qualite") !== -1;
+      var hasQC = raw.indexOf("controle_qualite") !== -1;
       if (hasQC) {
         _injectNavButton(isAdmin, hasQC);
         _enableAdminTab();
       }
-      _setupMobileSidebar(perms);
+      _setupMobileSidebar(raw);
     });
   }
 
