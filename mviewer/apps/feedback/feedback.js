@@ -411,10 +411,16 @@
   function _setupMobileSidebar() {
     if (window.innerWidth > 767) return;
 
+    var tablerLink = document.createElement("link");
+    tablerLink.rel = "stylesheet";
+    tablerLink.href =
+      "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css";
+    document.head.appendChild(tablerLink);
+
     var BTNS = [
-      { targetId: "dbe-nav-btn",    icon: "fa-database" },
-      { targetId: "routing-fab",    icon: "fa-route" },
-      { targetId: "fb-nav-btn",     icon: "fa-clipboard-list", badgeId: "fb-count-badge" },
+      { targetId: "dbe-nav-btn", icon: "ti-database",       label: "Base de données" },
+      { targetId: "routing-fab", icon: "ti-route",           label: "Itinéraire" },
+      { targetId: "fb-nav-btn",  icon: "ti-clipboard-check", label: "Recettage", badgeId: "fb-count-badge" },
     ];
 
     var sidebar = document.createElement("div");
@@ -422,20 +428,16 @@
     document.body.appendChild(sidebar);
 
     BTNS.forEach(function (cfg) {
-      var wrap = document.createElement("div");
-      wrap.className = "mv-sidebar-wrap";
-
       var btn = document.createElement("button");
       btn.className = "mv-sidebar-btn";
-      btn.innerHTML = '<i class="fas ' + cfg.icon + '"></i>';
+      btn.setAttribute("aria-label", cfg.label);
+      btn.innerHTML = '<i class="ti ' + cfg.icon + '" aria-hidden="true"></i>';
 
       if (cfg.badgeId) {
         var badge = document.createElement("span");
-        badge.id = "mv-sidebar-badge";
         badge.className = "mv-sidebar-badge";
         btn.appendChild(badge);
-
-        var _observer = new MutationObserver(function () {
+        var obs = new MutationObserver(function () {
           var src = document.getElementById(cfg.badgeId);
           if (!src) return;
           badge.textContent = src.textContent;
@@ -443,7 +445,7 @@
         });
         setTimeout(function () {
           var src = document.getElementById(cfg.badgeId);
-          if (src) _observer.observe(src, { attributes: true, childList: true });
+          if (src) obs.observe(src, { attributes: true, childList: true });
         }, 3000);
       }
 
@@ -452,8 +454,7 @@
         if (orig) orig.click();
       });
 
-      wrap.appendChild(btn);
-      sidebar.appendChild(wrap);
+      sidebar.appendChild(btn);
     });
   }
 

@@ -377,12 +377,16 @@
 
 #mv-plugin-sidebar {
   position: fixed;
-  left: 8px;
-  top: 68px;
+  left: 16px;
+  top: 62px;
   z-index: 1000;
   display: none;
   flex-direction: column;
-  gap: 2px;
+  background: #ffffff;
+  border: 0.5px solid rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12);
 }
 
 @media (max-width: 767px) {
@@ -391,29 +395,30 @@
   }
 }
 
-.mv-sidebar-wrap {
-  position: relative;
-}
-
 .mv-sidebar-btn {
-  width: 34px;
-  height: 34px;
-  background: rgba(255, 255, 255, 0.85);
+  width: 36px;
+  height: 36px;
+  background: #ffffff;
   border: none;
-  border-radius: 4px;
-  color: #333;
-  font-size: 15px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.15);
+  border-radius: 0;
+  padding: 0;
+  cursor: pointer;
+  color: #1f1f1f;
+  font-size: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: background 0.15s;
   position: relative;
+  transition: background 0.15s;
+}
+
+.mv-sidebar-btn:last-child {
+  border-bottom: none;
 }
 
 .mv-sidebar-btn:hover {
-  background: rgba(255, 255, 255, 1);
+  background: #f5f5f5;
 }
 
 .mv-sidebar-badge {
