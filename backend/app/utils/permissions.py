@@ -1,3 +1,13 @@
+ALL_PERMISSIONS = [
+    "backoffice",
+    "gestion_comptes",
+    "edition_donnees",
+    "generation_carto",
+    "consultation_carto",
+    "mode_presentation",
+    "controle_qualite",
+]
+
 VALID_ROLES = [
     "admin",
     "agent_sig",

@@ -42,8 +42,13 @@ def create_app(config_name: str = "development") -> Flask:
         try:
             from .models.user import AppUser  # noqa: F401
             from .models.feedback import Feedback  # noqa: F401
+            from .models.role_permission import RolePermission  # noqa: F401
 
             db.create_all()
+            try:
+                RolePermission.seed_defaults()
+            except Exception as seed_exc:
+                app.logger.warning(f"seed_defaults() ignoré : {seed_exc}")
         except Exception as exc:
             app.logger.warning(f"db.create_all() ignoré au démarrage : {exc}")
 
