@@ -283,10 +283,12 @@
       if (e.key === "Enter") _onChangePassword();
     });
 
-    /* Bouton fermer le modal */
+    /* Bouton fermer le modal — uniquement si déjà connecté (changement mdp) */
     document.getElementById("ua-modal-close").addEventListener("click", function () {
-      _hideOverlay();
-      _showStep(1);
+      if (_currentUser) {
+        _hideOverlay();
+        _showStep(1);
+      }
     });
   }
 
