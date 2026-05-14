@@ -233,6 +233,7 @@
       '            <th>Actif</th>',
       '            <th>Dernière connexion</th>',
       '            <th>Créé le</th>',
+      '            <th></th>',
       '          </tr>',
       '        </thead>',
       '        <tbody id="ua-admin-tbody"></tbody>',
@@ -774,6 +775,7 @@
 
     users.forEach(function (user) {
       var tr = document.createElement("tr");
+      tr.dataset.uid = user.id;
 
       var lastLogin = user.last_login
         ? new Date(user.last_login).toLocaleString("fr-FR")
@@ -786,7 +788,7 @@
         "<td>" + _escHtml(user.email) + "</td>",
         "<td>" + _escHtml(user.display_name || "—") + "</td>",
         "<td>",
-        '  <select class="ua-type-select" data-uid="' + user.id + '" data-field="user_type">',
+        '  <select class="ua-type-select" data-uid="' + user.id + '">',
         '    <option value="admin"'              + (user.user_type === "admin"              ? " selected" : "") + ">Administrateur</option>",
         '    <option value="agent_sig"'          + (user.user_type === "agent_sig"          ? " selected" : "") + ">Agent SIG</option>",
         '    <option value="agent_voirie"'       + (user.user_type === "agent_voirie"       ? " selected" : "") + ">Agent voirie</option>",
@@ -796,42 +798,59 @@
         "  </select>",
         "</td>",
         "<td>",
-        '  <input type="checkbox" class="ua-active-toggle" data-uid="' + user.id + '" data-field="is_active"' + (user.is_active ? " checked" : "") + " />",
+        '  <input type="checkbox" class="ua-active-toggle" data-uid="' + user.id + '"' + (user.is_active ? " checked" : "") + " />",
         "</td>",
         "<td>" + _escHtml(lastLogin) + "</td>",
-        "<td>" + _escHtml(createdAt) + "</td>"
+        "<td>" + _escHtml(createdAt) + "</td>",
+        '<td><button class="ua-save-row" data-uid="' + user.id + '">Enregistrer</button></td>'
       ].join("");
 
       tbody.appendChild(tr);
     });
 
-    /* Bind change events */
-    tbody.querySelectorAll("select[data-field='user_type']").forEach(function (sel) {
-      sel.addEventListener("change", function () {
-        _patchUser(this.dataset.uid, { user_type: this.value });
+    /* Marquer ligne modifiée sans sauvegarder */
+    tbody.querySelectorAll("select.ua-type-select, input.ua-active-toggle").forEach(function (el) {
+      el.addEventListener("change", function () {
+        var btn = tbody.querySelector('.ua-save-row[data-uid="' + this.dataset.uid + '"]');
+        if (btn) btn.classList.add("ua-save-pending");
       });
     });
 
-    tbody.querySelectorAll("input[data-field='is_active']").forEach(function (chk) {
-      chk.addEventListener("change", function () {
-        _patchUser(this.dataset.uid, { is_active: this.checked });
+    /* Bouton Enregistrer */
+    tbody.querySelectorAll(".ua-save-row").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var uid = this.dataset.uid;
+        var sel = tbody.querySelector('select.ua-type-select[data-uid="' + uid + '"]');
+        var chk = tbody.querySelector('input.ua-active-toggle[data-uid="' + uid + '"]');
+        _patchUser(uid, { user_type: sel.value, is_active: chk.checked }, btn);
       });
     });
   }
 
-  function _patchUser(userId, payload) {
+  function _patchUser(userId, payload, btn) {
+    if (btn) { btn.disabled = true; btn.textContent = "…"; }
     _fetchWithAuth(API_BASE + "/admin/users/" + userId, {
       method: "PATCH",
       body: JSON.stringify(payload)
     })
     .then(function (resp) {
-      if (!resp.ok) {
-        resp.json().then(function (d) {
-          alert(d.error || "Erreur lors de la mise à jour.");
-        });
+      return resp.json().then(function (d) { return { ok: resp.ok, data: d }; });
+    })
+    .then(function (r) {
+      if (btn) {
+        btn.disabled = false;
+        if (r.ok) {
+          btn.classList.remove("ua-save-pending");
+          btn.textContent = "✓ Enregistré";
+          setTimeout(function () { btn.textContent = "Enregistrer"; }, 2000);
+        } else {
+          btn.textContent = "Enregistrer";
+          alert(r.data.error || "Erreur lors de la mise à jour.");
+        }
       }
     })
     .catch(function () {
+      if (btn) { btn.disabled = false; btn.textContent = "Enregistrer"; }
       alert("Erreur réseau lors de la mise à jour.");
     });
   }
