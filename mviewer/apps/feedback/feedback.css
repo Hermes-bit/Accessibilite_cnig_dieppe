@@ -378,7 +378,7 @@
 #mv-plugin-sidebar {
   position: fixed;
   left: 16px;
-  top: 62px;
+  top: 68px;
   z-index: 1000;
   display: none;
   flex-direction: column;
