@@ -93,7 +93,12 @@ def update_feedback(fb_id):
         return jsonify({"error": "Retour introuvable"}), 404
 
     data = request.get_json(silent=True) or {}
-    if "status" in data and data["status"] in ("nouveau", "en_cours", "resolu", "ignore"):
+    if "status" in data and data["status"] in (
+        "nouveau",
+        "en_cours",
+        "resolu",
+        "ignore",
+    ):
         fb.status = data["status"]
     db.session.commit()
     return jsonify(fb.to_dict())
