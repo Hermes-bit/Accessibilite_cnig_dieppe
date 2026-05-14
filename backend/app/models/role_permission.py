@@ -17,6 +17,7 @@ class RolePermission(db.Model):
         except Exception:
             pass
         from app.utils.permissions import ROLE_PERMISSIONS
+
         return list(ROLE_PERMISSIONS.get(role, set()))
 
     @classmethod
@@ -26,6 +27,7 @@ class RolePermission(db.Model):
     @classmethod
     def seed_defaults(cls):
         from app.utils.permissions import ROLE_PERMISSIONS, VALID_ROLES
+
         changed = False
         for role in VALID_ROLES:
             if not cls.query.get(role):
