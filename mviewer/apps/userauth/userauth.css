@@ -450,6 +450,27 @@
 }
 .ua-perm-check input { width: 13px; height: 13px; cursor: pointer; accent-color: #0079c1; }
 
+/* ── Bouton enregistrer ligne utilisateur ──────────────── */
+.ua-save-row {
+  padding: 4px 11px;
+  border-radius: 7px;
+  border: 1.5px solid #e2e8f0;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #fff;
+  color: #64748b;
+  white-space: nowrap;
+  transition: all 0.12s;
+}
+.ua-save-row.ua-save-pending {
+  border-color: #0079c1;
+  color: #0079c1;
+  background: #eff6ff;
+}
+.ua-save-row:hover { background: #0079c1; color: #fff; border-color: #0079c1; }
+.ua-save-row:disabled { opacity: 0.5; cursor: not-allowed; }
+
 .ua-perm-save-btn {
   padding: 5px 14px;
   border-radius: 7px;
