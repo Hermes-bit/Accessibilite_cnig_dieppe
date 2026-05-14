@@ -1,4 +1,5 @@
-from tests.conftest import TEST_EMAIL, TEST_PASSWORD
+TEST_EMAIL = "admin@test.com"
+TEST_PASSWORD = "testpassword123"
 
 
 def test_health(client):

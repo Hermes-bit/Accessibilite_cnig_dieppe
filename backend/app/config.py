@@ -68,6 +68,10 @@ class TestingConfig(BaseConfig):
     )
     SECRET_KEY = "test-secret-key"
     JWT_SECRET_KEY = "test-jwt-secret"
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_pre_ping": True,
+        "pool_recycle": 300,
+    }
 
 
 config_by_name = {
