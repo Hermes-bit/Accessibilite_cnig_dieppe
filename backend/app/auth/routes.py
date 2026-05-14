@@ -24,10 +24,14 @@ _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
+
 def _is_token_revoked(jwt_header, jwt_payload) -> bool:
     jti = jwt_payload["jti"]
     try:
-        from app import jwt as jwt_manager  # noqa: F401  (avoid circular at module level)
+        from app import (
+            jwt as jwt_manager,
+        )  # noqa: F401  (avoid circular at module level)
+
         redis_client = _get_redis()
         if redis_client:
             return redis_client.get(f"jwt_blocklist:{jti}") is not None
@@ -42,6 +46,7 @@ def _get_redis():
     if redis_url.startswith("redis://"):
         try:
             import redis
+
             return redis.from_url(redis_url)
         except Exception:
             pass
@@ -61,6 +66,7 @@ def _revoke_token(jti: str) -> None:
 
 def _require_admin(fn):
     """Decorator that ensures the JWT identity belongs to an active admin user."""
+
     @wraps(fn)
     @jwt_required()
     def wrapper(*args, **kwargs):
@@ -69,10 +75,12 @@ def _require_admin(fn):
         if not user or not user.is_active or user.user_type != "admin":
             return jsonify({"error": "Accès réservé aux administrateurs"}), 403
         return fn(*args, **kwargs)
+
     return wrapper
 
 
 # ─── Routes ───────────────────────────────────────────────────────────────────
+
 
 @auth_bp.route("/request-access", methods=["POST"])
 @limiter.limit("5 per minute")
@@ -98,21 +106,25 @@ def request_access():
     db.session.commit()
 
     import os
+
     mail_configured = bool(os.environ.get("MAIL_SERVER", "").strip())
 
     try:
         send_temp_password(email, temp_password)
     except Exception:
-        current_app.logger.exception(
-            "Impossible d'envoyer l'e-mail à %s", email
-        )
+        current_app.logger.exception("Impossible d'envoyer l'e-mail à %s", email)
 
     if not mail_configured:
         # Dev mode : retourne le mot de passe directement (pas d'e-mail réel)
-        return jsonify({
-            "message": "Aucun serveur mail configuré — voici votre mot de passe temporaire :",
-            "dev_password": temp_password,
-        }), 200
+        return (
+            jsonify(
+                {
+                    "message": "Aucun serveur mail configuré — voici votre mot de passe temporaire :",
+                    "dev_password": temp_password,
+                }
+            ),
+            200,
+        )
 
     return jsonify({"message": "Un mot de passe a été envoyé à votre adresse"}), 200
 
@@ -137,11 +149,14 @@ def login():
     access_token = create_access_token(identity=email)
     refresh_token = create_refresh_token(identity=email)
 
-    return jsonify(
-        access_token=access_token,
-        refresh_token=refresh_token,
-        user=user.to_dict(),
-    ), 200
+    return (
+        jsonify(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            user=user.to_dict(),
+        ),
+        200,
+    )
 
 
 @auth_bp.route("/change-password", methods=["POST"])
@@ -156,7 +171,10 @@ def change_password():
     new_password = data.get("password") or ""
 
     if len(new_password) < 6:
-        return jsonify({"error": "Le mot de passe doit contenir au moins 6 caractères"}), 400
+        return (
+            jsonify({"error": "Le mot de passe doit contenir au moins 6 caractères"}),
+            400,
+        )
 
     user.set_password(new_password)
     user.first_login = False

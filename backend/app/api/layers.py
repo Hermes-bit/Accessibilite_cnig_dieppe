@@ -9,11 +9,25 @@ from sqlalchemy import func, text
 
 from app import db, limiter
 from app.models import (
-    NoeudCheminement, TronconCheminement, VTroncons,
-    Obstacle, VObstacles, Traversee, Circulation,
-    Ascenseur, Escalier, Escalator, Rampe, Elevateur,
-    PassageSelectif, Quai, StationnementPmr, TapisRoulant,
-    Erp, VErp, Entree,
+    NoeudCheminement,
+    TronconCheminement,
+    VTroncons,
+    Obstacle,
+    VObstacles,
+    Traversee,
+    Circulation,
+    Ascenseur,
+    Escalier,
+    Escalator,
+    Rampe,
+    Elevateur,
+    PassageSelectif,
+    Quai,
+    StationnementPmr,
+    TapisRoulant,
+    Erp,
+    VErp,
+    Entree,
 )
 from app.models.base import _clean_value
 from . import api_bp
@@ -21,52 +35,56 @@ from . import api_bp
 
 LAYERS = {
     # Vues enrichies (libellés + couleurs) — à préférer pour mviewer
-    "v_troncons":  VTroncons,
+    "v_troncons": VTroncons,
     "v_obstacles": VObstacles,
-    "v_erp":       VErp,
+    "v_erp": VErp,
     # Tables brutes
     "troncon_cheminement": TronconCheminement,
-    "noeud_cheminement":   NoeudCheminement,
-    "obstacle":            Obstacle,
-    "traversee":           Traversee,
-    "circulation":         Circulation,
-    "ascenseur":           Ascenseur,
-    "escalier":            Escalier,
-    "escalator":           Escalator,
-    "rampe":               Rampe,
-    "elevateur":           Elevateur,
-    "passage_selectif":    PassageSelectif,
-    "quai":                Quai,
-    "stationnement_pmr":   StationnementPmr,
-    "tapis_roulant":       TapisRoulant,
-    "erp":                 Erp,
-    "entree":              Entree,
+    "noeud_cheminement": NoeudCheminement,
+    "obstacle": Obstacle,
+    "traversee": Traversee,
+    "circulation": Circulation,
+    "ascenseur": Ascenseur,
+    "escalier": Escalier,
+    "escalator": Escalator,
+    "rampe": Rampe,
+    "elevateur": Elevateur,
+    "passage_selectif": PassageSelectif,
+    "quai": Quai,
+    "stationnement_pmr": StationnementPmr,
+    "tapis_roulant": TapisRoulant,
+    "erp": Erp,
+    "entree": Entree,
 }
 
 
 def _valid_identifier(name: str) -> bool:
-    return bool(re.match(r'^[a-z][a-z0-9_]{0,62}$', name))
+    return bool(re.match(r"^[a-z][a-z0-9_]{0,62}$", name))
 
 
 def _table_exists(table_name: str) -> bool:
-    q = text("""
+    q = text(
+        """
         SELECT 1
         FROM information_schema.tables
         WHERE table_schema = 'cnig_accessibilite'
           AND table_name = :table_name
         LIMIT 1
-    """)
+    """
+    )
     return bool(db.session.execute(q, {"table_name": table_name}).fetchone())
 
 
 def _get_geometry_column(table_name: str):
-    q = text("""
+    q = text(
+        """
         SELECT f_geometry_column
         FROM public.geometry_columns
         WHERE f_table_schema = 'cnig_accessibilite'
           AND f_table_name = :table_name
         LIMIT 1
-    """)
+    """
+    )
     row = db.session.execute(q, {"table_name": table_name}).fetchone()
     return row[0] if row else None
 
@@ -82,7 +100,7 @@ def _build_generic_geojson(layer_name: str, bbox: str, limit: int, offset: int):
         try:
             xmin, ymin, xmax, ymax = map(float, bbox.split(","))
             bbox_filter = (
-                "WHERE ST_Within(" \
+                "WHERE ST_Within("
                 f"{geom_col}, ST_MakeEnvelope(:xmin, :ymin, :xmax, :ymax, 4326))"
             )
             params.update({"xmin": xmin, "ymin": ymin, "xmax": xmax, "ymax": ymax})
@@ -107,7 +125,11 @@ def _build_generic_geojson(layer_name: str, bbox: str, limit: int, offset: int):
             if col == "_geojson":
                 geom = v
             elif col != geom_col:
-                props[col] = None if v is None else (v if isinstance(v, (bool, int, float)) else str(v))
+                props[col] = (
+                    None
+                    if v is None
+                    else (v if isinstance(v, (bool, int, float)) else str(v))
+                )
         features.append({"type": "Feature", "geometry": geom, "properties": props})
 
     return {"type": "FeatureCollection", "features": features}, None
@@ -170,7 +192,9 @@ def _build_geojson_from_orm(rows):
             if col.name != geom_field
         }
         geometry = _clean_geometry(json.loads(geojson_str)) if geojson_str else None
-        features.append({"type": "Feature", "geometry": geometry, "properties": properties})
+        features.append(
+            {"type": "Feature", "geometry": geometry, "properties": properties}
+        )
     return {
         "type": "FeatureCollection",
         "features": features,
@@ -188,7 +212,7 @@ def list_layers():
 def get_layer(layer_name: str):
     model = LAYERS.get(layer_name)
     bbox = request.args.get("bbox")
-    limit  = min(int(request.args.get("limit", 1000)), 10000)
+    limit = min(int(request.args.get("limit", 1000)), 10000)
     offset = int(request.args.get("offset", 0))
 
     if model is not None:
@@ -221,10 +245,14 @@ def get_feature(layer_name: str, feature_id: str):
         return jsonify({"error": f"Couche '{layer_name}' introuvable"}), 404
 
     pk_col = model.__table__.primary_key.columns.values()[0]
-    row = db.session.query(
-        model,
-        func.ST_AsGeoJSON(func.ST_Transform(model.geom, 4326)).label("_geojson"),
-    ).filter(pk_col == feature_id).first()
+    row = (
+        db.session.query(
+            model,
+            func.ST_AsGeoJSON(func.ST_Transform(model.geom, 4326)).label("_geojson"),
+        )
+        .filter(pk_col == feature_id)
+        .first()
+    )
 
     if row is None:
         return jsonify({"error": "Entité introuvable"}), 404

@@ -24,7 +24,9 @@ class BaseConfig:
     MVIEWER_DIR = os.environ.get(
         "MVIEWER_DIR",
         os.path.normpath(
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "mviewer-dist")
+            os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), "..", "..", "mviewer-dist"
+            )
         ),
     )
 
@@ -43,10 +45,10 @@ def _build_db_url():
     url = os.environ.get("DATABASE_URL", "")
     if not url:
         user = os.environ.get("DB_USER", "hermes58")
-        pw   = os.environ.get("DB_PASS", "")
+        pw = os.environ.get("DB_PASS", "")
         host = os.environ.get("DB_HOST", "postgresql-hermes58.alwaysdata.net")
         name = os.environ.get("DB_NAME", "hermes58_a4")
-        url  = f"postgresql://{user}:{pw}@{host}:5432/{name}"
+        url = f"postgresql://{user}:{pw}@{host}:5432/{name}"
     return url
 
 

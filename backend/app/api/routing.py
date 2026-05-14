@@ -30,14 +30,15 @@ _COST_WHEELCHAIR_RELAXED = """
 """
 
 _PROFILES = {
-    "pedestrian": {"cost": _COST_PEDESTRIAN,  "speed": 1.2},
-    "wheelchair": {"cost": _COST_WHEELCHAIR,   "speed": 0.7},
+    "pedestrian": {"cost": _COST_PEDESTRIAN, "speed": 1.2},
+    "wheelchair": {"cost": _COST_WHEELCHAIR, "speed": 0.7},
 }
 
 
 def _snap_node(lon, lat):
     """Retourne le nœud de routage le plus proche avec sa distance réelle."""
-    q = text(f"""
+    q = text(
+        f"""
         SELECT node_id,
                ST_X(ST_Transform(geom, 4326))  AS snap_lon,
                ST_Y(ST_Transform(geom, 4326))  AS snap_lat,
@@ -47,21 +48,23 @@ def _snap_node(lon, lat):
         FROM cnig_accessibilite.routing_nodes
         ORDER BY geom <-> ST_Transform(ST_SetSRID(ST_MakePoint({lon}, {lat}), 4326), 2154)
         LIMIT 1
-    """)
+    """
+    )
     row = db.session.execute(q).fetchone()
     if not row:
         return None
     return {
         "node_id": int(row.node_id),
-        "lon":     float(row.snap_lon),
-        "lat":     float(row.snap_lat),
-        "dist_m":  int(row.dist_m),
+        "lon": float(row.snap_lon),
+        "lat": float(row.snap_lat),
+        "dist_m": int(row.dist_m),
     }
 
 
 def _same_component(node_a, node_b):
     """Vérifie si deux nœuds appartiennent à la même composante connexe."""
-    q = text(f"""
+    q = text(
+        f"""
         WITH components AS (
             SELECT node, component
             FROM pgr_connectedComponents(
@@ -72,7 +75,8 @@ def _same_component(node_a, node_b):
         SELECT
             (SELECT component FROM components WHERE node = {node_a}) AS ca,
             (SELECT component FROM components WHERE node = {node_b}) AS cb
-    """)
+    """
+    )
     row = db.session.execute(q).fetchone()
     if not row or row[0] is None or row[1] is None:
         return False
@@ -81,11 +85,12 @@ def _same_component(node_a, node_b):
 
 def _run_dijkstra(start_node, end_node, profile_key, relaxed=False):
     """Dijkstra entre deux node_id déjà snappés. Retourne GeoJSON ou None."""
-    cfg      = _PROFILES[profile_key]
+    cfg = _PROFILES[profile_key]
     cost_expr = _COST_WHEELCHAIR_RELAXED if relaxed else cfg["cost"]
-    speed_ms  = cfg["speed"]
+    speed_ms = cfg["speed"]
 
-    query = text(f"""
+    query = text(
+        f"""
         WITH route AS (
             SELECT r.seq, r.edge, r.cost, r.agg_cost
             FROM pgr_dijkstra(
@@ -114,7 +119,8 @@ def _run_dijkstra(start_node, end_node, profile_key, relaxed=False):
         FROM route r
         JOIN cnig_accessibilite.routing_edges_base e ON e.id = r.edge
         ORDER BY r.seq
-    """)
+    """
+    )
 
     rows = db.session.execute(query).fetchall()
     if not rows:
@@ -122,32 +128,33 @@ def _run_dijkstra(start_node, end_node, profile_key, relaxed=False):
 
     total_distance = sum(float(r.longueur or 0) for r in rows)
     total_duration = total_distance / speed_ms
-    inacc_count    = sum(1 for r in rows if r.accessibiliteglobale == "03")
+    inacc_count = sum(1 for r in rows if r.accessibiliteglobale == "03")
 
     features = [
         {
             "type": "Feature",
             "geometry": r.geometry,
             "properties": {
-                "seq":                  r.seq,
-                "idtroncon":            r.idtroncon,
-                "longueur":             float(r.longueur or 0),
-                "pente":                float(r.pente or 0),
-                "largeurutile":         float(r.largeurutile or 0),
+                "seq": r.seq,
+                "idtroncon": r.idtroncon,
+                "longueur": float(r.longueur or 0),
+                "pente": float(r.pente or 0),
+                "largeurutile": float(r.largeurutile or 0),
                 "accessibiliteglobale": r.accessibiliteglobale,
-                "etatrevetement":       r.etatrevetement,
+                "etatrevetement": r.etatrevetement,
             },
         }
-        for r in rows if r.geometry is not None
+        for r in rows
+        if r.geometry is not None
     ]
 
     return {
-        "type":                  "FeatureCollection",
-        "features":              features,
-        "profile":               profile_key,
-        "relaxed":               relaxed,
-        "total_distance":        round(total_distance),
-        "total_duration":        round(total_duration),
+        "type": "FeatureCollection",
+        "features": features,
+        "profile": profile_key,
+        "relaxed": relaxed,
+        "total_distance": round(total_distance),
+        "total_duration": round(total_duration),
         "inaccessible_segments": inacc_count,
     }
 
@@ -155,9 +162,9 @@ def _run_dijkstra(start_node, end_node, profile_key, relaxed=False):
 @api_bp.route("/routing", methods=["POST"])
 @limiter.limit("60 per minute")
 def compute_route():
-    data    = request.get_json(silent=True) or {}
-    start   = data.get("start")
-    end     = data.get("end")
+    data = request.get_json(silent=True) or {}
+    start = data.get("start")
+    end = data.get("end")
     profile = data.get("profile", "pedestrian")
 
     if not start or not end or len(start) != 2 or len(end) != 2:
@@ -167,7 +174,7 @@ def compute_route():
 
     try:
         slon, slat = float(start[0]), float(start[1])
-        elon, elat = float(end[0]),   float(end[1])
+        elon, elat = float(end[0]), float(end[1])
     except (TypeError, ValueError):
         return jsonify({"error": "Coordonnées invalides"}), 400
 
@@ -177,18 +184,33 @@ def compute_route():
         snap_e = _snap_node(elon, elat)
 
         if not snap_s or not snap_e:
-            return jsonify({"error": "Aucun nœud de routage trouvé dans le réseau"}), 404
+            return (
+                jsonify({"error": "Aucun nœud de routage trouvé dans le réseau"}),
+                404,
+            )
 
         # Avertissement si le snap est trop éloigné (> 300 m)
         snap_warnings = []
         if snap_s["dist_m"] > 300:
-            snap_warnings.append(f"Départ : le point le plus proche du réseau est à {snap_s['dist_m']} m de l'adresse saisie")
+            snap_warnings.append(
+                f"Départ : le point le plus proche du réseau est à {snap_s['dist_m']} m de l'adresse saisie"
+            )
         if snap_e["dist_m"] > 300:
-            snap_warnings.append(f"Arrivée : le point le plus proche du réseau est à {snap_e['dist_m']} m de l'adresse saisie")
+            snap_warnings.append(
+                f"Arrivée : le point le plus proche du réseau est à {snap_e['dist_m']} m de l'adresse saisie"
+            )
 
         snap_info = {
-            "start": {"lon": snap_s["lon"], "lat": snap_s["lat"], "dist_m": snap_s["dist_m"]},
-            "end":   {"lon": snap_e["lon"], "lat": snap_e["lat"], "dist_m": snap_e["dist_m"]},
+            "start": {
+                "lon": snap_s["lon"],
+                "lat": snap_s["lat"],
+                "dist_m": snap_s["dist_m"],
+            },
+            "end": {
+                "lon": snap_e["lon"],
+                "lat": snap_e["lat"],
+                "dist_m": snap_e["dist_m"],
+            },
         }
 
         sid, eid = snap_s["node_id"], snap_e["node_id"]
@@ -207,34 +229,36 @@ def compute_route():
 
         if profile == "both":
             ped = _run_dijkstra(sid, eid, "pedestrian")
-            wc  = _run_dijkstra(sid, eid, "wheelchair")
+            wc = _run_dijkstra(sid, eid, "wheelchair")
             wc_relaxed = False
             if wc is None:
                 wc = _run_dijkstra(sid, eid, "wheelchair", relaxed=True)
                 wc_relaxed = True
             if ped is None and wc is None:
                 return _no_route_error()
-            return jsonify({
-                "type":          "both",
-                "pedestrian":    ped,
-                "wheelchair":    wc,
-                "wc_relaxed":    wc_relaxed,
-                "snap":          snap_info,
-                "snap_warnings": snap_warnings,
-            })
+            return jsonify(
+                {
+                    "type": "both",
+                    "pedestrian": ped,
+                    "wheelchair": wc,
+                    "wc_relaxed": wc_relaxed,
+                    "snap": snap_info,
+                    "snap_warnings": snap_warnings,
+                }
+            )
 
         result = _run_dijkstra(sid, eid, profile)
         relaxed = False
         if result is None and profile == "wheelchair":
-            result  = _run_dijkstra(sid, eid, "wheelchair", relaxed=True)
+            result = _run_dijkstra(sid, eid, "wheelchair", relaxed=True)
             relaxed = True
 
         if result is None:
             return _no_route_error()
 
-        result["snap"]          = snap_info
+        result["snap"] = snap_info
         result["snap_warnings"] = snap_warnings
-        result["relaxed"]       = relaxed
+        result["relaxed"] = relaxed
         return jsonify(result)
 
     except Exception as exc:

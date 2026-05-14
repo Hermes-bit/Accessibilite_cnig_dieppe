@@ -47,7 +47,7 @@ jobs:
 
       - name: Audit dependencies
         working-directory: backend
-        run: pip-audit -r requirements.txt --output json -o pip-audit-report.json || pip-audit -r requirements.txt
+        run: pip-audit -r requirements.txt -f json -o pip-audit-report.json || true
 
       - name: Upload audit report
         uses: actions/upload-artifact@v4

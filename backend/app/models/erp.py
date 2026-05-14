@@ -39,6 +39,7 @@ class Erp(GeoModelMixin, db.Model):
 
 class VErp(GeoModelMixin, db.Model):
     """Vue enrichie avec libellés et couleur d'accessibilité."""
+
     __tablename__ = "v_erp"
     __table_args__ = {"schema": "cnig_accessibilite"}
 

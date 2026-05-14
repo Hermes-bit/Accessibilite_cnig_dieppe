@@ -43,6 +43,7 @@ class TronconCheminement(GeoModelMixin, db.Model):
 
 class VTroncons(GeoModelMixin, db.Model):
     """Vue enrichie avec libellés et couleur d'accessibilité."""
+
     __tablename__ = "v_troncons"
     __table_args__ = {"schema": "cnig_accessibilite"}
 
@@ -95,6 +96,7 @@ class Obstacle(GeoModelMixin, db.Model):
 
 class VObstacles(GeoModelMixin, db.Model):
     """Vue enrichie avec libellés et couleur."""
+
     __tablename__ = "v_obstacles"
     __table_args__ = {"schema": "cnig_accessibilite"}
 

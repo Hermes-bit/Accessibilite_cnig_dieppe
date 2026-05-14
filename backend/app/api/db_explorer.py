@@ -12,37 +12,53 @@ from app import db, limiter
 from . import api_bp
 
 _PROTECTED_TABLES = {
-    "v_troncons", "v_obstacles", "v_erp",
-    "troncon_cheminement", "noeud_cheminement", "obstacle",
-    "traversee", "circulation", "ascenseur", "escalier", "escalator",
-    "rampe", "elevateur", "passage_selectif", "quai", "stationnement_pmr",
-    "tapis_roulant", "erp", "entree",
+    "v_troncons",
+    "v_obstacles",
+    "v_erp",
+    "troncon_cheminement",
+    "noeud_cheminement",
+    "obstacle",
+    "traversee",
+    "circulation",
+    "ascenseur",
+    "escalier",
+    "escalator",
+    "rampe",
+    "elevateur",
+    "passage_selectif",
+    "quai",
+    "stationnement_pmr",
+    "tapis_roulant",
+    "erp",
+    "entree",
 }
 
 _FORBIDDEN = re.compile(
-    r'\b(INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|TRUNCATE|GRANT|REVOKE|EXECUTE|COPY)\b',
+    r"\b(INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|TRUNCATE|GRANT|REVOKE|EXECUTE|COPY)\b",
     re.IGNORECASE,
 )
 
 
 def _is_safe(sql: str) -> bool:
-    cleaned = re.sub(r'--[^\n]*', '', sql)
-    cleaned = re.sub(r'/\*.*?\*/', '', cleaned, flags=re.DOTALL).strip()
-    if not cleaned.upper().startswith('SELECT'):
+    cleaned = re.sub(r"--[^\n]*", "", sql)
+    cleaned = re.sub(r"/\*.*?\*/", "", cleaned, flags=re.DOTALL).strip()
+    if not cleaned.upper().startswith("SELECT"):
         return False
     return not _FORBIDDEN.search(cleaned)
 
 
 def _valid_identifier(name: str) -> bool:
-    return bool(re.match(r'^[a-z][a-z0-9_]{0,62}$', name))
+    return bool(re.match(r"^[a-z][a-z0-9_]{0,62}$", name))
 
 
 # ── Tables ──────────────────────────────────────────────────────────────────
 
+
 @api_bp.route("/db/tables", methods=["GET"])
 def db_tables():
     """Retourne toutes les tables/vues du schéma cnig_accessibilite avec leurs colonnes."""
-    q = text("""
+    q = text(
+        """
         SELECT t.table_name,
                t.table_type,
                c.column_name,
@@ -54,7 +70,8 @@ def db_tables():
          AND c.table_name   = t.table_name
         WHERE t.table_schema = 'cnig_accessibilite'
         ORDER BY t.table_name, c.ordinal_position
-    """)
+    """
+    )
     rows = db.session.execute(q).fetchall()
 
     tables = {}
@@ -62,8 +79,8 @@ def db_tables():
         name = row[0]
         if name not in tables:
             tables[name] = {
-                "name":    name,
-                "kind":    "view" if row[1] == "VIEW" else "table",
+                "name": name,
+                "kind": "view" if row[1] == "VIEW" else "table",
                 "columns": [],
             }
         tables[name]["columns"].append({"name": row[2], "type": row[3]})
@@ -73,12 +90,13 @@ def db_tables():
 
 # ── Query ────────────────────────────────────────────────────────────────────
 
+
 @api_bp.route("/db/query", methods=["POST"])
 @limiter.limit("60 per minute")
 def db_query():
     """Exécute une requête SELECT (read-only) et retourne colonnes + lignes."""
-    data  = request.get_json(silent=True) or {}
-    sql   = data.get("sql", "").strip()
+    data = request.get_json(silent=True) or {}
+    sql = data.get("sql", "").strip()
     limit = min(int(data.get("limit", 500)), 2000)
 
     if not sql:
@@ -89,14 +107,14 @@ def db_query():
     try:
         t0 = time.time()
         sql_clean = sql.rstrip().rstrip(";").rstrip()
-        wrapped   = f"SELECT * FROM ({sql_clean}) _explorer LIMIT {limit + 1}"
-        result    = db.session.execute(text(wrapped))
+        wrapped = f"SELECT * FROM ({sql_clean}) _explorer LIMIT {limit + 1}"
+        result = db.session.execute(text(wrapped))
         col_names = list(result.keys())
-        all_rows  = result.fetchall()
-        elapsed   = time.time() - t0
+        all_rows = result.fetchall()
+        elapsed = time.time() - t0
 
         has_more = len(all_rows) > limit
-        rows     = all_rows[:limit]
+        rows = all_rows[:limit]
 
         def _cell(v):
             if v is None:
@@ -105,13 +123,15 @@ def db_query():
                 return v
             return str(v)
 
-        return jsonify({
-            "columns":    col_names,
-            "rows":       [[_cell(c) for c in row] for row in rows],
-            "count":      len(rows),
-            "has_more":   has_more,
-            "elapsed_ms": round(elapsed * 1000),
-        })
+        return jsonify(
+            {
+                "columns": col_names,
+                "rows": [[_cell(c) for c in row] for row in rows],
+                "count": len(rows),
+                "has_more": has_more,
+                "elapsed_ms": round(elapsed * 1000),
+            }
+        )
 
     except Exception as exc:
         db.session.rollback()
@@ -120,14 +140,15 @@ def db_query():
 
 # ── Export ───────────────────────────────────────────────────────────────────
 
+
 @api_bp.route("/db/export", methods=["POST"])
 @limiter.limit("30 per minute")
 def db_export():
     """Export query result as CSV or GeoJSON file download."""
-    data  = request.get_json(silent=True) or {}
-    fmt   = data.get("format", "csv").lower()
+    data = request.get_json(silent=True) or {}
+    fmt = data.get("format", "csv").lower()
     table = (data.get("table") or "").strip()
-    sql   = data.get("sql", "").strip()
+    sql = data.get("sql", "").strip()
 
     if fmt not in ("csv", "geojson"):
         return jsonify({"error": "Format non supporté (csv ou geojson)"}), 400
@@ -136,20 +157,32 @@ def db_export():
 
     if fmt == "geojson":
         if not table or not _valid_identifier(table):
-            return jsonify({"error": "Le nom de la table est requis pour l'export GeoJSON"}), 400
+            return (
+                jsonify(
+                    {"error": "Le nom de la table est requis pour l'export GeoJSON"}
+                ),
+                400,
+            )
         # Find geometry column
-        q = text("""
+        q = text(
+            """
             SELECT f_geometry_column
             FROM public.geometry_columns
             WHERE f_table_schema = 'cnig_accessibilite'
               AND f_table_name   = :tname
             LIMIT 1
-        """)
+        """
+        )
         row = db.session.execute(q, {"tname": table}).fetchone()
         if not row:
-            return jsonify({"error": "Aucune colonne géométrique trouvée pour cette table"}), 400
+            return (
+                jsonify(
+                    {"error": "Aucune colonne géométrique trouvée pour cette table"}
+                ),
+                400,
+            )
         geom_col = row[0]
-        sql_run  = (
+        sql_run = (
             f"SELECT *, ST_AsGeoJSON(ST_Transform({geom_col}, 4326))::json AS _geojson"
             f" FROM cnig_accessibilite.{table}"
         )
@@ -157,7 +190,10 @@ def db_export():
         # CSV: use provided SQL or build from table name
         if sql:
             if not _is_safe(sql):
-                return jsonify({"error": "Seules les requêtes SELECT sont autorisées"}), 403
+                return (
+                    jsonify({"error": "Seules les requêtes SELECT sont autorisées"}),
+                    403,
+                )
             sql_run = sql.rstrip().rstrip(";").rstrip()
         elif table and _valid_identifier(table):
             sql_run = f"SELECT * FROM cnig_accessibilite.{table}"
@@ -165,39 +201,43 @@ def db_export():
             return jsonify({"error": "SQL ou nom de table requis"}), 400
 
     try:
-        result    = db.session.execute(text(sql_run))
+        result = db.session.execute(text(sql_run))
         col_names = list(result.keys())
-        rows      = result.fetchall()
-        filename  = table or "export"
+        rows = result.fetchall()
+        filename = table or "export"
 
         if fmt == "csv":
             out = io.StringIO()
-            w   = csv.writer(out)
+            w = csv.writer(out)
             w.writerow(col_names)
             for row in rows:
                 w.writerow(["" if v is None else str(v) for v in row])
             return Response(
-                "﻿" + out.getvalue(),   # UTF-8 BOM for Excel compatibility
+                "﻿" + out.getvalue(),  # UTF-8 BOM for Excel compatibility
                 mimetype="text/csv; charset=utf-8",
-                headers={"Content-Disposition": f'attachment; filename="{filename}.csv"'},
+                headers={
+                    "Content-Disposition": f'attachment; filename="{filename}.csv"'
+                },
             )
 
         else:  # geojson
             features = []
             for row in rows:
                 props = {}
-                geom  = None
+                geom = None
                 for i, col in enumerate(col_names):
                     v = row[i]
                     if col == "_geojson":
                         geom = v
                     elif col != geom_col:
                         props[col] = (
-                            None if v is None
-                            else v if isinstance(v, (bool, int, float))
-                            else str(v)
+                            None
+                            if v is None
+                            else v if isinstance(v, (bool, int, float)) else str(v)
                         )
-                features.append({"type": "Feature", "geometry": geom, "properties": props})
+                features.append(
+                    {"type": "Feature", "geometry": geom, "properties": props}
+                )
             fc = json.dumps(
                 {"type": "FeatureCollection", "features": features},
                 ensure_ascii=False,
@@ -206,7 +246,9 @@ def db_export():
             return Response(
                 fc,
                 mimetype="application/geo+json; charset=utf-8",
-                headers={"Content-Disposition": f'attachment; filename="{filename}.geojson"'},
+                headers={
+                    "Content-Disposition": f'attachment; filename="{filename}.geojson"'
+                },
             )
 
     except Exception as exc:
@@ -223,20 +265,24 @@ def db_drop_table():
     if not table or not _valid_identifier(table):
         return jsonify({"error": "Nom de table invalide."}), 400
 
-    q = text("""
+    q = text(
+        """
         SELECT 1
         FROM information_schema.tables
         WHERE table_schema = 'cnig_accessibilite'
           AND table_name = :table_name
         LIMIT 1
-    """)
+    """
+    )
     if not db.session.execute(q, {"table_name": table}).fetchone():
         return jsonify({"error": "Table introuvable."}), 404
     if table in _PROTECTED_TABLES:
         return jsonify({"error": "Suppression interdite pour cette table."}), 403
 
     try:
-        db.session.execute(text(f"DROP TABLE IF EXISTS cnig_accessibilite.{table} CASCADE"))
+        db.session.execute(
+            text(f"DROP TABLE IF EXISTS cnig_accessibilite.{table} CASCADE")
+        )
         db.session.commit()
         return jsonify({"success": True, "table": table})
     except Exception as exc:
@@ -246,20 +292,26 @@ def db_drop_table():
 
 # ── Import ───────────────────────────────────────────────────────────────────
 
+
 @api_bp.route("/db/import", methods=["POST"])
 @limiter.limit("10 per minute")
 def db_import():
     """Import GeoJSON file or Shapefile ZIP into cnig_accessibilite schema."""
-    file       = request.files.get("file")
+    file = request.files.get("file")
     table_name = (request.form.get("table_name") or "").strip().lower()
-    mode       = request.form.get("mode", "create")   # "create" | "append"
+    mode = request.form.get("mode", "create")  # "create" | "append"
 
     if not file or not file.filename:
         return jsonify({"error": "Aucun fichier reçu"}), 400
     if not table_name or not _valid_identifier(table_name):
-        return jsonify({
-            "error": "Nom de table invalide (lettres minuscules, chiffres, underscores, commençant par une lettre)"
-        }), 400
+        return (
+            jsonify(
+                {
+                    "error": "Nom de table invalide (lettres minuscules, chiffres, underscores, commençant par une lettre)"
+                }
+            ),
+            400,
+        )
     if mode not in ("create", "append"):
         return jsonify({"error": "Mode invalide (create ou append)"}), 400
 
@@ -270,9 +322,14 @@ def db_import():
         elif fname.endswith(".zip"):
             return _import_shapefile_zip(file, table_name, mode)
         else:
-            return jsonify({
-                "error": "Format non supporté. Fournissez un fichier .geojson ou un .zip contenant les fichiers Shapefile."
-            }), 400
+            return (
+                jsonify(
+                    {
+                        "error": "Format non supporté. Fournissez un fichier .geojson ou un .zip contenant les fichiers Shapefile."
+                    }
+                ),
+                400,
+            )
     except Exception as exc:
         db.session.rollback()
         return jsonify({"error": f"Erreur lors de l'import : {exc}"}), 500
@@ -280,7 +337,7 @@ def db_import():
 
 def _safe_col(name: str) -> str:
     """Sanitise un nom de colonne en identifiant SQL valide."""
-    s = re.sub(r'[^a-zA-Z0-9]', '_', name).lower()[:63]
+    s = re.sub(r"[^a-zA-Z0-9]", "_", name).lower()[:63]
     if not s or s[0].isdigit():
         s = "col_" + s
     return s
@@ -299,12 +356,18 @@ def _create_table(full_table: str, prop_cols: list, mode: str) -> None:
     if mode == "create":
         db.session.execute(text(f"DROP TABLE IF EXISTS {full_table}"))
     cols_ddl = (", ".join(f'"{c}" TEXT' for c in prop_cols) + ", ") if prop_cols else ""
-    db.session.execute(text(
-        f"CREATE TABLE IF NOT EXISTS {full_table} "
-        f"(id SERIAL PRIMARY KEY, {cols_ddl}geom GEOMETRY(Geometry, 4326))"
-    ))
-    safe_index = re.sub(r'[^a-zA-Z0-9_]', '_', full_table).replace('__', '_')
-    db.session.execute(text(f"CREATE INDEX IF NOT EXISTS {safe_index}_geom_idx ON {full_table} USING GIST(geom)"))
+    db.session.execute(
+        text(
+            f"CREATE TABLE IF NOT EXISTS {full_table} "
+            f"(id SERIAL PRIMARY KEY, {cols_ddl}geom GEOMETRY(Geometry, 4326))"
+        )
+    )
+    safe_index = re.sub(r"[^a-zA-Z0-9_]", "_", full_table).replace("__", "_")
+    db.session.execute(
+        text(
+            f"CREATE INDEX IF NOT EXISTS {safe_index}_geom_idx ON {full_table} USING GIST(geom)"
+        )
+    )
     db.session.commit()
 
 
@@ -316,7 +379,10 @@ def _import_geojson(file, table_name: str, mode: str):
         return jsonify({"error": f"Fichier GeoJSON invalide : {exc}"}), 400
 
     if gj.get("type") != "FeatureCollection":
-        return jsonify({"error": "Le fichier doit être un GeoJSON FeatureCollection"}), 400
+        return (
+            jsonify({"error": "Le fichier doit être un GeoJSON FeatureCollection"}),
+            400,
+        )
 
     features = gj.get("features") or []
     if not features:
@@ -326,7 +392,7 @@ def _import_geojson(file, table_name: str, mode: str):
     all_keys: list[str] = []
     seen: set[str] = set()
     for feat in features:
-        for k in (feat.get("properties") or {}):
+        for k in feat.get("properties") or {}:
             sk = _safe_prop_col(k)
             if sk not in seen:
                 all_keys.append(sk)
@@ -334,7 +400,7 @@ def _import_geojson(file, table_name: str, mode: str):
     # Map original key → safe key
     key_map: dict[str, str] = {}
     for feat in features:
-        for k in (feat.get("properties") or {}):
+        for k in feat.get("properties") or {}:
             key_map[k] = _safe_prop_col(k)
 
     full_table = f"cnig_accessibilite.{table_name}"
@@ -347,10 +413,10 @@ def _import_geojson(file, table_name: str, mode: str):
             skipped += 1
             continue
 
-        props  = feat.get("properties") or {}
+        props = feat.get("properties") or {}
         params: dict = {"geom_json": json.dumps(geom_json)}
-        cols:   list = []
-        vals:   list = []
+        cols: list = []
+        vals: list = []
 
         for orig_k, safe_k in key_map.items():
             if orig_k in props and safe_k in all_keys:
@@ -370,12 +436,14 @@ def _import_geojson(file, table_name: str, mode: str):
         inserted += 1
 
     db.session.commit()
-    return jsonify({
-        "success":  True,
-        "table":    f"cnig_accessibilite.{table_name}",
-        "inserted": inserted,
-        "skipped":  skipped,
-    })
+    return jsonify(
+        {
+            "success": True,
+            "table": f"cnig_accessibilite.{table_name}",
+            "inserted": inserted,
+            "skipped": skipped,
+        }
+    )
 
 
 def _import_shapefile_zip(file, table_name: str, mode: str):
@@ -383,7 +451,10 @@ def _import_shapefile_zip(file, table_name: str, mode: str):
     try:
         import shapefile  # noqa: PLC0415 — pyshp
     except ImportError:
-        return jsonify({"error": "Le module pyshp n'est pas installé sur le serveur."}), 500
+        return (
+            jsonify({"error": "Le module pyshp n'est pas installé sur le serveur."}),
+            500,
+        )
 
     raw = file.read()
     try:
@@ -392,25 +463,33 @@ def _import_shapefile_zip(file, table_name: str, mode: str):
         return jsonify({"error": "Le fichier ZIP est corrompu"}), 400
 
     with zf:
-        names   = zf.namelist()
-        shp_n   = next((n for n in names if n.lower().endswith(".shp")), None)
-        dbf_n   = next((n for n in names if n.lower().endswith(".dbf")), None)
-        shx_n   = next((n for n in names if n.lower().endswith(".shx")), None)
-        prj_n   = next((n for n in names if n.lower().endswith(".prj")), None)
+        names = zf.namelist()
+        shp_n = next((n for n in names if n.lower().endswith(".shp")), None)
+        dbf_n = next((n for n in names if n.lower().endswith(".dbf")), None)
+        shx_n = next((n for n in names if n.lower().endswith(".shx")), None)
+        prj_n = next((n for n in names if n.lower().endswith(".prj")), None)
 
         if not shp_n or not dbf_n:
-            return jsonify({"error": "Le ZIP doit contenir au minimum les fichiers .shp et .dbf"}), 400
+            return (
+                jsonify(
+                    {
+                        "error": "Le ZIP doit contenir au minimum les fichiers .shp et .dbf"
+                    }
+                ),
+                400,
+            )
 
         shp_data = io.BytesIO(zf.read(shp_n))
         dbf_data = io.BytesIO(zf.read(dbf_n))
         shx_data = io.BytesIO(zf.read(shx_n)) if shx_n else None
-        prj_wkt  = zf.read(prj_n).decode("utf-8", errors="ignore") if prj_n else None
+        prj_wkt = zf.read(prj_n).decode("utf-8", errors="ignore") if prj_n else None
 
     # Detect source SRID from .prj
     src_srid = 4326
     if prj_wkt:
         try:
             from pyproj import CRS  # noqa: PLC0415
+
             epsg = CRS.from_wkt(prj_wkt).to_epsg()
             if epsg:
                 src_srid = int(epsg)
@@ -422,7 +501,7 @@ def _import_shapefile_zip(file, table_name: str, mode: str):
     except Exception as exc:
         return jsonify({"error": f"Impossible de lire le Shapefile : {exc}"}), 400
 
-    raw_fields  = [f[0] for f in reader.fields[1:]]   # skip DeletionFlag
+    raw_fields = [f[0] for f in reader.fields[1:]]  # skip DeletionFlag
     safe_fields = [_safe_prop_col(f) for f in raw_fields]
 
     full_table = f"cnig_accessibilite.{table_name}"
@@ -431,7 +510,7 @@ def _import_shapefile_zip(file, table_name: str, mode: str):
     inserted = skipped = 0
     for sr in reader.iterShapeRecords():
         try:
-            geo_iface    = sr.shape.__geo_interface__
+            geo_iface = sr.shape.__geo_interface__
             geom_json_str = json.dumps(geo_iface)
         except Exception:
             skipped += 1
@@ -439,8 +518,8 @@ def _import_shapefile_zip(file, table_name: str, mode: str):
 
         record = list(sr.record)
         params: dict = {"geom_json": geom_json_str}
-        cols:   list = []
-        vals:   list = []
+        cols: list = []
+        vals: list = []
 
         for i, (safe_k, val) in enumerate(zip(safe_fields, record)):
             pk = f"p{i}"
@@ -459,10 +538,12 @@ def _import_shapefile_zip(file, table_name: str, mode: str):
         inserted += 1
 
     db.session.commit()
-    return jsonify({
-        "success":   True,
-        "table":     f"cnig_accessibilite.{table_name}",
-        "inserted":  inserted,
-        "skipped":   skipped,
-        "src_srid":  src_srid,
-    })
+    return jsonify(
+        {
+            "success": True,
+            "table": f"cnig_accessibilite.{table_name}",
+            "inserted": inserted,
+            "skipped": skipped,
+            "src_srid": src_srid,
+        }
+    )

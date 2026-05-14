@@ -32,7 +32,7 @@ def create_app(config_name: str = "development") -> Flask:
     CORS(
         app,
         resources={
-            r"/api/*":  {"origins": app.config["CORS_ORIGINS"]},
+            r"/api/*": {"origins": app.config["CORS_ORIGINS"]},
             r"/auth/*": {"origins": app.config["CORS_ORIGINS"]},
         },
         supports_credentials=True,
@@ -42,6 +42,7 @@ def create_app(config_name: str = "development") -> Flask:
     with app.app_context():
         try:
             from .models.user import AppUser  # noqa: F401
+
             db.create_all()
         except Exception as exc:
             app.logger.warning(f"db.create_all() ignoré au démarrage : {exc}")
@@ -58,6 +59,7 @@ def create_app(config_name: str = "development") -> Flask:
 
     mviewer_dir = app.config.get("MVIEWER_DIR", "")
     if mviewer_dir and os.path.isdir(mviewer_dir):
+
         @app.route("/", defaults={"path": "index.html"})
         @app.route("/<path:path>")
         def serve_mviewer(path):
