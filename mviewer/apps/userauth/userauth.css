@@ -613,11 +613,18 @@
     padding: 8px 8px;
   }
 
-  /* Menu dropdown chip : s'ouvre à gauche sur mobile */
+  /* Menu dropdown chip : centré sur l'écran en mobile */
   .ua-chip-menu {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     right: auto;
-    left: 0;
-    min-width: 180px;
+    min-width: 240px;
+    max-width: calc(100vw - 32px);
+    border-radius: 14px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
+    z-index: 9999;
   }
 }
 
