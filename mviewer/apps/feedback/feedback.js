@@ -82,7 +82,7 @@
       '      <div class="fb-msg" id="fb-msg"></div>',
       '      <div class="fb-group" id="fb-reporter-group">',
       '        <label>Votre nom / e-mail</label>',
-      '        <input type="text" id="fb-reporter" placeholder="ex. Aristide" />',
+      '        <input type="text" id="fb-reporter" placeholder="ex: Prénom ou nomprenom@exemple.com" />',
       "      </div>",
       '      <div class="fb-group">',
       "        <label>Sévérité</label>",
