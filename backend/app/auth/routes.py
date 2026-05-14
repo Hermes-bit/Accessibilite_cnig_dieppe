@@ -14,6 +14,7 @@ from flask_jwt_extended import (
 from app import db, limiter
 from app.models.user import AppUser
 from app.utils.email_service import generate_temp_password, send_temp_password
+from app.utils.permissions import VALID_ROLES, get_permissions
 from . import auth_bp
 
 # ─── In-memory token blocklist (fallback when Redis is unavailable) ───────────
@@ -188,7 +189,9 @@ def me():
     user = AppUser.query.filter_by(email=identity).first()
     if not user or not user.is_active:
         return jsonify({"error": "Utilisateur introuvable"}), 404
-    return jsonify(user.to_dict()), 200
+    data = user.to_dict()
+    data["permissions"] = get_permissions(user.user_type)
+    return jsonify(data), 200
 
 
 @auth_bp.route("/logout", methods=["POST"])
@@ -215,10 +218,9 @@ def admin_update_user(user_id: int):
 
     data = request.get_json(silent=True) or {}
 
-    valid_types = {"viewer", "editor", "creator", "admin"}
     if "user_type" in data:
-        if data["user_type"] not in valid_types:
-            return jsonify({"error": "Type d'utilisateur invalide"}), 400
+        if data["user_type"] not in VALID_ROLES:
+            return jsonify({"error": "Rôle invalide"}), 400
         user.user_type = data["user_type"]
 
     if "is_active" in data:

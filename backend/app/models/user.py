@@ -12,7 +12,7 @@ class AppUser(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
-    user_type = db.Column(db.String(50), nullable=False, default="viewer")
+    user_type = db.Column(db.String(50), nullable=False, default="association_pmr")
     display_name = db.Column(db.String(100), nullable=True)
     first_login = db.Column(db.Boolean, nullable=False, default=True)
     is_active = db.Column(db.Boolean, nullable=False, default=True)
