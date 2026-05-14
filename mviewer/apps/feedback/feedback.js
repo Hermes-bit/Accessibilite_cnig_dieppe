@@ -68,8 +68,8 @@
     overlay.innerHTML = [
       '<div id="fb-panel">',
       "  <div id=\"fb-header\">",
-      "    <i class=\"fas fa-comment-alt\"></i>",
-      "    <h2 id=\"fb-title\">Signaler un retour</h2>",
+      "    <i class=\"fas fa-clipboard-list\"></i>",
+      "    <h2 id=\"fb-title\">Recettage — Signaler un retour</h2>",
       "    <button id=\"fb-close\" title=\"Fermer\">&times;</button>",
       "  </div>",
       '  <div id="fb-tabs" style="display:none">',
@@ -82,7 +82,7 @@
       '      <div class="fb-msg" id="fb-msg"></div>',
       '      <div class="fb-group" id="fb-reporter-group">',
       '        <label>Votre nom / e-mail</label>',
-      '        <input type="text" id="fb-reporter" placeholder="ex. Aristide" />',
+      '        <input type="text" id="fb-reporter" placeholder="ex: Prénom ou nomprenom@exemple.com" />',
       "      </div>",
       '      <div class="fb-group">',
       "        <label>Sévérité</label>",
@@ -343,8 +343,8 @@
 
     li.innerHTML =
       '<button id="fb-nav-btn" class="btn btn-light mv-navbar-btn" title="Signaler un retour de test">' +
-      '<i class="fas fa-comment-alt"></i>' +
-      '<span class="mv-btn-label"> Retour</span>' +
+      '<i class="fas fa-clipboard-list"></i>' +
+      '<span class="mv-btn-label"> Recettage</span>' +
       '<span id="fb-count-badge"></span>' +
       "</button>";
 

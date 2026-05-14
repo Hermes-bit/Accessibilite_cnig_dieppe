@@ -38,10 +38,10 @@ def create_app(config_name: str = "development") -> Flask:
         supports_credentials=True,
     )
 
-    # Ensure app_users table exists (public schema, separate from CNIG schema)
     with app.app_context():
         try:
             from .models.user import AppUser  # noqa: F401
+            from .models.feedback import Feedback  # noqa: F401
 
             db.create_all()
         except Exception as exc:
