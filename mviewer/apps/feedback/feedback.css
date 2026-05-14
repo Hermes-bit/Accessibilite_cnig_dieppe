@@ -362,11 +362,16 @@
 }
 
 /* ── Sidebar mobile — boutons plugin à gauche ─────────── */
+/* Masquer les boutons plugin dans la navbar sur mobile */
 @media (max-width: 767px) {
   #dbe-nav-item,
   #routing-nav-item,
-  #fb-nav-item {
+  #fb-nav-item,
+  li:has(#dbe-nav-btn),
+  li:has(#routing-fab),
+  li:has(#fb-nav-btn) {
     display: none !important;
+    visibility: hidden !important;
   }
 }
 
@@ -392,14 +397,14 @@
 }
 
 .mv-sidebar-btn {
-  width: 40px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.88);
+  width: 38px;
+  height: 38px;
+  background: #fff;
   border: none;
   border-radius: 4px;
-  color: #333;
-  font-size: 16px;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.28);
+  color: #444;
+  font-size: 17px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.30);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -409,8 +414,7 @@
 }
 
 .mv-sidebar-btn:hover {
-  background: rgba(255, 255, 255, 1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  background: #f4f4f4;
 }
 
 .mv-sidebar-badge {
