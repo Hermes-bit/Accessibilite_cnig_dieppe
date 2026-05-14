@@ -306,9 +306,7 @@ def db_import():
     if not table_name or not _valid_identifier(table_name):
         return (
             jsonify(
-                {
-                    "error": "Nom de table invalide (lettres minuscules, chiffres, underscores, commençant par une lettre)"
-                }
+                {"error": "Nom de table invalide (min. lettres, chiffres, underscores)"}
             ),
             400,
         )
@@ -325,7 +323,7 @@ def db_import():
             return (
                 jsonify(
                     {
-                        "error": "Format non supporté. Fournissez un fichier .geojson ou un .zip contenant les fichiers Shapefile."
+                        "error": "Format non supporté. Fournissez un .geojson ou un .zip Shapefile."
                     }
                 ),
                 400,

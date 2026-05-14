@@ -28,9 +28,7 @@ _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 def _is_token_revoked(jwt_header, jwt_payload) -> bool:
     jti = jwt_payload["jti"]
     try:
-        from app import (
-            jwt as jwt_manager,
-        )  # noqa: F401  (avoid circular at module level)
+        from app import jwt as jwt_manager  # noqa: F401
 
         redis_client = _get_redis()
         if redis_client:
