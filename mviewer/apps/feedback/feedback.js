@@ -407,6 +407,35 @@
     if (tabs) tabs.style.display = "flex";
   }
 
+  /* ── Sidebar mobile (boutons plugin à gauche) ──────────── */
+  function _setupMobileSidebar() {
+    if (window.innerWidth > 767) return;
+
+    function tryBuild(attempts) {
+      var dbe = document.getElementById("dbe-nav-item");
+      var routing = document.getElementById("routing-nav-item");
+      var fb = document.getElementById("fb-nav-item");
+      if ((!dbe || !routing || !fb) && attempts > 0) {
+        setTimeout(function () {
+          tryBuild(attempts - 1);
+        }, 400);
+        return;
+      }
+      if (!dbe && !routing && !fb) return;
+
+      var sidebar = document.createElement("div");
+      sidebar.id = "mv-plugin-sidebar";
+      document.body.appendChild(sidebar);
+
+      [dbe, routing, fb].forEach(function (li) {
+        if (li) sidebar.appendChild(li);
+      });
+    }
+    setTimeout(function () {
+      tryBuild(25);
+    }, 1800);
+  }
+
   /* ── Init ───────────────────────────────────────────────── */
   function _init() {
     _buildPanel();
@@ -416,13 +445,13 @@
       if (isAdmin) {
         _enableAdminTab();
       } else {
-        /* Hide reporter field if user is logged in */
         if (user) {
           var rg = document.getElementById("fb-reporter-group");
           if (rg) rg.style.display = "none";
         }
       }
     });
+    _setupMobileSidebar();
   }
 
   /* Start after mviewer is ready */

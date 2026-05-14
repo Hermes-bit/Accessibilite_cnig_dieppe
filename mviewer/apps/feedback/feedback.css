@@ -361,7 +361,64 @@
   border: 2px solid #fff;
 }
 
-/* ── Mobile ───────────────────────────────────────────── */
+/* ── Sidebar mobile — boutons plugin à gauche ─────────── */
+#mv-plugin-sidebar {
+  position: fixed;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1000;
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+}
+
+@media (max-width: 767px) {
+  #mv-plugin-sidebar {
+    display: flex;
+  }
+
+  #mv-plugin-sidebar li {
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #mv-plugin-sidebar .mv-navbar-btn {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    padding: 0 !important;
+    background: rgba(255, 255, 255, 0.88) !important;
+    border: none !important;
+    border-radius: 4px !important;
+    color: #333 !important;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.28) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transform: none !important;
+    transition: background 0.15s !important;
+  }
+
+  #mv-plugin-sidebar .mv-navbar-btn:hover {
+    background: rgba(255, 255, 255, 1) !important;
+    transform: none !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+  }
+
+  #mv-plugin-sidebar .mv-btn-label {
+    display: none !important;
+  }
+
+  #mv-plugin-sidebar .mv-navbar-btn i {
+    font-size: 16px !important;
+    opacity: 0.85;
+    color: #333 !important;
+  }
+}
+
+/* ── Mobile — panel feedback ──────────────────────────── */
 @media (max-width: 767px) {
   #fb-panel {
     width: calc(100vw - 16px);
