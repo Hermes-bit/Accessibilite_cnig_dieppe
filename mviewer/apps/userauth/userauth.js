@@ -217,21 +217,30 @@
       '    <h2><i class="fas fa-users" style="margin-right:10px;"></i>Gestion des utilisateurs</h2>',
       '    <button id="ua-admin-close">&times;</button>',
       '  </div>',
+      '  <div id="ua-admin-tabs">',
+      '    <button class="ua-atab active" data-view="users"><i class="fas fa-users"></i> Utilisateurs</button>',
+      '    <button class="ua-atab" data-view="permissions"><i class="fas fa-key"></i> Permissions des rôles</button>',
+      '  </div>',
       '  <div id="ua-admin-body">',
-      '    <p id="ua-admin-loading" style="color:#888;font-size:13px;">Chargement…</p>',
-      '    <table id="ua-admin-table" style="display:none;">',
-      '      <thead>',
-      '        <tr>',
-      '          <th>E-mail</th>',
-      '          <th>Nom</th>',
-      '          <th>Rôle</th>',
-      '          <th>Actif</th>',
-      '          <th>Dernière connexion</th>',
-      '          <th>Créé le</th>',
-      '        </tr>',
-      '      </thead>',
-      '      <tbody id="ua-admin-tbody"></tbody>',
-      '    </table>',
+      '    <div id="ua-view-users">',
+      '      <p id="ua-admin-loading" style="color:#888;font-size:13px;">Chargement…</p>',
+      '      <table id="ua-admin-table" style="display:none;">',
+      '        <thead>',
+      '          <tr>',
+      '            <th>E-mail</th>',
+      '            <th>Nom</th>',
+      '            <th>Rôle</th>',
+      '            <th>Actif</th>',
+      '            <th>Dernière connexion</th>',
+      '            <th>Créé le</th>',
+      '          </tr>',
+      '        </thead>',
+      '        <tbody id="ua-admin-tbody"></tbody>',
+      '      </table>',
+      '    </div>',
+      '    <div id="ua-view-permissions" style="display:none;">',
+      '      <div id="ua-perms-content"><p style="color:#888;font-size:13px;">Chargement…</p></div>',
+      '    </div>',
       '  </div>',
       '</div>'
     ].join("\n");
@@ -244,6 +253,106 @@
 
     panel.addEventListener("click", function (e) {
       if (e.target === panel) _closeAdminPanel();
+    });
+
+    panel.querySelectorAll(".ua-atab").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        panel.querySelectorAll(".ua-atab").forEach(function (b) { b.classList.remove("active"); });
+        this.classList.add("active");
+        var view = this.dataset.view;
+        document.getElementById("ua-view-users").style.display = view === "users" ? "" : "none";
+        document.getElementById("ua-view-permissions").style.display = view === "permissions" ? "" : "none";
+        if (view === "permissions") _loadRolePermissions();
+      });
+    });
+  }
+
+  /* ── Permissions des rôles ────────────────────────────── */
+  var _PERM_LABELS = {
+    backoffice:        "Backoffice",
+    gestion_comptes:   "Gestion comptes",
+    edition_donnees:   "Édition données",
+    generation_carto:  "Génération carto",
+    consultation_carto:"Consultation carto",
+    mode_presentation: "Mode présentation",
+    controle_qualite:  "Contrôle qualité",
+  };
+
+  function _loadRolePermissions() {
+    var container = document.getElementById("ua-perms-content");
+    if (!container) return;
+    container.innerHTML = '<p style="color:#888;font-size:13px;">Chargement…</p>';
+
+    _fetchWithAuth(API_BASE + "/admin/role-permissions")
+      .then(function (resp) { return resp.json(); })
+      .then(function (data) { _renderPermissionsMatrix(container, data.roles, data.all_permissions); })
+      .catch(function () {
+        container.innerHTML = '<p style="color:#e53e3e;font-size:13px;">Erreur lors du chargement.</p>';
+      });
+  }
+
+  function _renderPermissionsMatrix(container, roles, allPerms) {
+    var _RL = {
+      admin: "Administrateur", agent_sig: "Agent SIG",
+      agent_voirie: "Agent voirie", agent_collectivite: "Agent collectivité",
+      prestataire: "Prestataire", association_pmr: "Association PMR",
+    };
+
+    var html = ['<div class="ua-perms-wrap">'];
+    html.push('<p class="ua-perms-hint">Cochez les permissions pour chaque rôle puis sauvegardez.</p>');
+
+    Object.keys(roles).forEach(function (role) {
+      var perms = roles[role];
+      html.push('<div class="ua-perm-row">');
+      html.push('<div class="ua-perm-role">' + (_RL[role] || role) + '</div>');
+      html.push('<div class="ua-perm-checks">');
+      allPerms.forEach(function (perm) {
+        var checked = perms.indexOf(perm) !== -1 ? " checked" : "";
+        html.push(
+          '<label class="ua-perm-check">' +
+          '<input type="checkbox" data-role="' + role + '" data-perm="' + perm + '"' + checked + '>' +
+          '<span>' + (_PERM_LABELS[perm] || perm) + '</span>' +
+          '</label>'
+        );
+      });
+      html.push('</div>');
+      html.push('<button class="ua-perm-save-btn" data-role="' + role + '">Sauvegarder</button>');
+      html.push('</div>');
+    });
+
+    html.push('</div>');
+    container.innerHTML = html.join('');
+
+    container.querySelectorAll('.ua-perm-save-btn').forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var role = this.dataset.role;
+        var checked = [];
+        container.querySelectorAll('input[data-role="' + role + '"]:checked').forEach(function (cb) {
+          checked.push(cb.dataset.perm);
+        });
+        _saveRolePermission(role, checked, btn);
+      });
+    });
+  }
+
+  function _saveRolePermission(role, permissions, btn) {
+    var orig = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "…";
+
+    _fetchWithAuth(API_BASE + "/admin/role-permissions/" + role, {
+      method: "PATCH",
+      body: JSON.stringify({ permissions: permissions }),
+    })
+    .then(function (resp) {
+      btn.disabled = false;
+      btn.textContent = resp.ok ? "✓ Sauvegardé" : "Erreur";
+      setTimeout(function () { btn.textContent = orig; }, 2000);
+    })
+    .catch(function () {
+      btn.disabled = false;
+      btn.textContent = "Erreur";
+      setTimeout(function () { btn.textContent = orig; }, 2000);
     });
   }
 

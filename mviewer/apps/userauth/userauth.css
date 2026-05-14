@@ -374,6 +374,96 @@
 .ua-badge-prestataire        { background: rgba(168,85,247,0.30);  color: #e9d5ff; }
 .ua-badge-association_pmr    { background: rgba(255,255,255,0.15); color: #e0e0e0; }
 
+/* ── Onglets admin ─────────────────────────────────────── */
+#ua-admin-tabs {
+  display: flex;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+  flex-shrink: 0;
+}
+
+.ua-atab {
+  padding: 11px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.ua-atab.active { color: #0079c1; border-bottom-color: #0079c1; }
+.ua-atab:hover:not(.active) { color: #334155; background: #f1f5f9; }
+
+/* ── Matrice permissions ───────────────────────────────── */
+.ua-perms-wrap { padding: 4px 0; }
+
+.ua-perms-hint {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 14px;
+}
+
+.ua-perm-row {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: #fafbfc;
+}
+
+.ua-perm-role {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 10px;
+}
+
+.ua-perm-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.ua-perm-check {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #475569;
+  cursor: pointer;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 4px 9px;
+  transition: background 0.12s;
+}
+.ua-perm-check:has(input:checked) {
+  background: #dbeafe;
+  border-color: #3b82f6;
+  color: #1d4ed8;
+}
+.ua-perm-check input { width: 13px; height: 13px; cursor: pointer; accent-color: #0079c1; }
+
+.ua-perm-save-btn {
+  padding: 5px 14px;
+  border-radius: 7px;
+  border: 1.5px solid #0079c1;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #fff;
+  color: #0079c1;
+  transition: all 0.12s;
+}
+.ua-perm-save-btn:hover { background: #0079c1; color: #fff; }
+.ua-perm-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
 /* ── Chip dropdown menu ────────────────────────────────── */
 .ua-chip-menu {
   position: absolute;

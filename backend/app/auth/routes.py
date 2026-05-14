@@ -14,7 +14,8 @@ from flask_jwt_extended import (
 from app import db, limiter
 from app.models.user import AppUser
 from app.utils.email_service import generate_temp_password, send_temp_password
-from app.utils.permissions import VALID_ROLES, get_permissions
+from app.utils.permissions import VALID_ROLES, ALL_PERMISSIONS
+from app.models.role_permission import RolePermission
 from . import auth_bp
 
 # ─── In-memory token blocklist (fallback when Redis is unavailable) ───────────
@@ -190,7 +191,7 @@ def me():
     if not user or not user.is_active:
         return jsonify({"error": "Utilisateur introuvable"}), 404
     data = user.to_dict()
-    data["permissions"] = get_permissions(user.user_type)
+    data["permissions"] = RolePermission.get(user.user_type)
     return jsonify(data), 200
 
 
@@ -231,3 +232,30 @@ def admin_update_user(user_id: int):
 
     db.session.commit()
     return jsonify(user.to_dict()), 200
+
+
+@auth_bp.route("/admin/role-permissions", methods=["GET"])
+@_require_admin
+def admin_get_role_permissions():
+    result = {role: RolePermission.get(role) for role in VALID_ROLES}
+    return jsonify({"roles": result, "all_permissions": ALL_PERMISSIONS})
+
+
+@auth_bp.route("/admin/role-permissions/<role>", methods=["PATCH"])
+@_require_admin
+def admin_update_role_permissions(role: str):
+    if role not in VALID_ROLES:
+        return jsonify({"error": "Rôle invalide"}), 400
+
+    data = request.get_json(silent=True) or {}
+    perms = [p for p in (data.get("permissions") or []) if p in ALL_PERMISSIONS]
+
+    rp = RolePermission.query.get(role)
+    if rp:
+        rp.permissions = perms
+    else:
+        rp = RolePermission(role=role, permissions=perms)
+        db.session.add(rp)
+
+    db.session.commit()
+    return jsonify({"role": role, "permissions": perms})
