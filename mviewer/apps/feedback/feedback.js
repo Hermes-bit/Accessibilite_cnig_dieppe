@@ -456,6 +456,18 @@
 
       sidebar.appendChild(btn);
     });
+
+    /* Aligner verticalement avec les boutons zoom OL */
+    function _alignWithZoom() {
+      var zoom = document.querySelector(".ol-zoom");
+      var sb = document.getElementById("mv-plugin-sidebar");
+      if (zoom && sb) {
+        var rect = zoom.getBoundingClientRect();
+        sb.style.top = rect.top + "px";
+      }
+    }
+    setTimeout(_alignWithZoom, 2500);
+    window.addEventListener("resize", _alignWithZoom);
   }
 
   /* ── Init ───────────────────────────────────────────────── */
