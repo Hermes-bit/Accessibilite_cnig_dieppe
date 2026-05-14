@@ -361,7 +361,76 @@
   border: 2px solid #fff;
 }
 
-/* ── Mobile ───────────────────────────────────────────── */
+/* ── Sidebar mobile — boutons plugin à gauche ─────────── */
+@media (max-width: 767px) {
+  #dbe-nav-item,
+  #routing-nav-item,
+  #fb-nav-item {
+    display: none !important;
+  }
+}
+
+#mv-plugin-sidebar {
+  position: fixed;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1000;
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+}
+
+@media (max-width: 767px) {
+  #mv-plugin-sidebar {
+    display: flex;
+  }
+}
+
+.mv-sidebar-wrap {
+  position: relative;
+}
+
+.mv-sidebar-btn {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.88);
+  border: none;
+  border-radius: 4px;
+  color: #333;
+  font-size: 16px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+  position: relative;
+}
+
+.mv-sidebar-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.mv-sidebar-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+}
+
+/* ── Mobile — panel feedback ──────────────────────────── */
 @media (max-width: 767px) {
   #fb-panel {
     width: calc(100vw - 16px);

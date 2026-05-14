@@ -407,6 +407,56 @@
     if (tabs) tabs.style.display = "flex";
   }
 
+  /* ── Sidebar mobile (boutons plugin à gauche) ──────────── */
+  function _setupMobileSidebar() {
+    if (window.innerWidth > 767) return;
+
+    var BTNS = [
+      { targetId: "dbe-nav-btn",    icon: "fa-database" },
+      { targetId: "routing-fab",    icon: "fa-route" },
+      { targetId: "fb-nav-btn",     icon: "fa-clipboard-list", badgeId: "fb-count-badge" },
+    ];
+
+    var sidebar = document.createElement("div");
+    sidebar.id = "mv-plugin-sidebar";
+    document.body.appendChild(sidebar);
+
+    BTNS.forEach(function (cfg) {
+      var wrap = document.createElement("div");
+      wrap.className = "mv-sidebar-wrap";
+
+      var btn = document.createElement("button");
+      btn.className = "mv-sidebar-btn";
+      btn.innerHTML = '<i class="fas ' + cfg.icon + '"></i>';
+
+      if (cfg.badgeId) {
+        var badge = document.createElement("span");
+        badge.id = "mv-sidebar-badge";
+        badge.className = "mv-sidebar-badge";
+        btn.appendChild(badge);
+
+        var _observer = new MutationObserver(function () {
+          var src = document.getElementById(cfg.badgeId);
+          if (!src) return;
+          badge.textContent = src.textContent;
+          badge.style.display = src.style.display === "none" ? "none" : "flex";
+        });
+        setTimeout(function () {
+          var src = document.getElementById(cfg.badgeId);
+          if (src) _observer.observe(src, { attributes: true, childList: true });
+        }, 3000);
+      }
+
+      btn.addEventListener("click", function () {
+        var orig = document.getElementById(cfg.targetId);
+        if (orig) orig.click();
+      });
+
+      wrap.appendChild(btn);
+      sidebar.appendChild(wrap);
+    });
+  }
+
   /* ── Init ───────────────────────────────────────────────── */
   function _init() {
     _buildPanel();
@@ -416,13 +466,13 @@
       if (isAdmin) {
         _enableAdminTab();
       } else {
-        /* Hide reporter field if user is logged in */
         if (user) {
           var rg = document.getElementById("fb-reporter-group");
           if (rg) rg.style.display = "none";
         }
       }
     });
+    _setupMobileSidebar();
   }
 
   /* Start after mviewer is ready */
