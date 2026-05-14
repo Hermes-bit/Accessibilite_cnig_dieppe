@@ -1,6 +1,7 @@
 import os
 
 import pytest
+from sqlalchemy import text
 
 os.environ.setdefault("SECRET_KEY", "test-secret")
 os.environ.setdefault("JWT_SECRET_KEY", "test-jwt-secret")
@@ -16,6 +17,9 @@ TEST_PASSWORD = "testpassword123"
 def app():
     app = create_app("testing")
     with app.app_context():
+        with _db.engine.connect() as conn:
+            conn.execute(text("CREATE SCHEMA IF NOT EXISTS cnig_accessibilite"))
+            conn.commit()
         _db.create_all()
         if not AppUser.query.filter_by(email=TEST_EMAIL).first():
             user = AppUser(email=TEST_EMAIL, user_type="admin", is_active=True)

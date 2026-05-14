@@ -80,6 +80,7 @@
 
     overlay.innerHTML = '<div id="ua-modal">'
       + '<div id="ua-modal-header">'
+      + '<button id="ua-modal-close" class="ua-modal-close" title="Fermer">&times;</button>'
       + '<div class="ua-logo-icon"><i class="fas fa-universal-access"></i></div>'
       + '<h2>Accessibilité CNIG Dieppe</h2>'
       + '<p>Plateforme de gestion d&#39;accessibilité</p>'
@@ -271,6 +272,12 @@
     document.getElementById("ua-btn-change").addEventListener("click", _onChangePassword);
     document.getElementById("ua-newpwd2").addEventListener("keydown", function (e) {
       if (e.key === "Enter") _onChangePassword();
+    });
+
+    /* Bouton fermer le modal */
+    document.getElementById("ua-modal-close").addEventListener("click", function () {
+      _hideOverlay();
+      _showStep(1);
     });
   }
 

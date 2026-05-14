@@ -65,6 +65,34 @@
   background: var(--ua-navy);
   padding: 24px 28px 20px;
   text-align: center;
+  position: relative;
+}
+
+/* ── Bouton fermer (croix) ─────────────────────────────── */
+.ua-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ua-modal-close:hover,
+.ua-modal-close:focus {
+  background: rgba(255, 255, 255, 0.28);
+  outline: none;
 }
 
 #ua-modal-header .ua-logo-icon {
@@ -580,10 +608,24 @@
     gap: 4px;
   }
 
-  /* Modal login plein écran sur très petit écran */
+  /* Modal login — plein écran mobile avec scroll si clavier ouvert */
+  #ua-overlay {
+    align-items: flex-start;
+    padding: 16px 12px;
+    padding-top: max(16px, env(safe-area-inset-top, 16px));
+    padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+    overflow-y: auto;
+  }
+
   #ua-modal {
-    width: calc(100vw - 24px);
-    margin: 0 12px;
+    width: 100%;
+    max-width: 420px;
+    margin: auto;
+    flex-shrink: 0;
+  }
+
+  #ua-modal-header {
+    padding: 20px 24px 18px;
   }
 
   #ua-modal-body {
@@ -629,7 +671,6 @@
 }
 
 @media (max-width: 480px) {
-  /* Réduire la taille du modal header */
   #ua-modal-header {
     padding: 16px 18px 14px;
   }
@@ -642,9 +683,29 @@
     font-size: 26px;
   }
 
-  /* Boutons full width */
   .ua-btn {
-    padding: 12px 14px;
-    font-size: 15px;
+    padding: 14px;
+    font-size: 16px;
+  }
+
+  /* Champs de saisie plus grands pour les doigts */
+  .ua-form-group input {
+    padding: 13px 14px;
+    font-size: 16px; /* évite le zoom auto sur iOS */
+  }
+}
+
+/* ── iPhone Pro Max (430px+) et grandes phablettes ──────── */
+@media (min-width: 390px) and (max-width: 767px) {
+  #ua-modal {
+    max-width: 400px;
+  }
+
+  .ua-modal-close {
+    top: 14px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    font-size: 22px;
   }
 }
