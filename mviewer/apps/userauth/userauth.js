@@ -138,8 +138,43 @@
     _bindModalEvents();
   }
 
+  /** Bouton "Se connecter" affiché dans la navbar quand non authentifié. */
+  function _buildLoginButton() {
+    if (document.getElementById("ua-login-btn-nav")) return;
+    var li = document.createElement("li");
+    li.id = "ua-login-btn-nav";
+    li.className = "ms-2";
+    li.innerHTML = '<button class="btn btn-light mv-navbar-btn" id="ua-login-trigger">'
+      + '<i class="fas fa-sign-in-alt"></i>'
+      + '<span class="mv-btn-label"> Se connecter</span>'
+      + '</button>';
+
+    function _tryInject(attempts) {
+      var navRight = document.querySelector("ul.nav.navbar-nav.navbar-right")
+                 || document.querySelector("ul.navbar-nav.navbar-right")
+                 || document.querySelector("ul.navbar-nav");
+      if (navRight) {
+        var helpLi = navRight.querySelector("li.ms-3");
+        helpLi ? navRight.insertBefore(li, helpLi) : navRight.appendChild(li);
+        document.getElementById("ua-login-trigger").addEventListener("click", function () {
+          _showStep(1);
+          _showOverlay();
+        });
+      } else if (attempts > 0) {
+        setTimeout(function () { _tryInject(attempts - 1); }, 200);
+      }
+    }
+    _tryInject(20);
+  }
+
+  function _removeLoginButton() {
+    var btn = document.getElementById("ua-login-btn-nav");
+    if (btn) btn.parentNode.removeChild(btn);
+  }
+
   /** Build the user chip and inject it into the mviewer navbar (with retry). */
   function _buildUserChip(user) {
+    _removeLoginButton();
     var existing = document.getElementById("ua-user-chip");
     if (existing) existing.parentNode.removeChild(existing);
 
@@ -393,11 +428,13 @@
       if (e.key === "Enter") _onChangePassword();
     });
 
-    /* Bouton fermer le modal — uniquement si déjà connecté (changement mdp) */
+    /* Bouton fermer le modal */
     document.getElementById("ua-modal-close").addEventListener("click", function () {
-      if (_currentUser) {
-        _hideOverlay();
-        _showStep(1);
+      _hideOverlay();
+      _showStep(1);
+      if (!_currentUser) {
+        _applyRoleRestrictions(null);
+        _buildLoginButton();
       }
     });
   }
@@ -710,12 +747,39 @@
     }
   }
 
+  /* ================================================================
+     INACTIVITY TIMEOUT (5 min)
+  ================================================================ */
+  var _inactivityTimer = null;
+  var _INACTIVITY_MS = 5 * 60 * 1000;
+
+  function _resetInactivityTimer() {
+    if (!_currentUser) return;
+    clearTimeout(_inactivityTimer);
+    _inactivityTimer = setTimeout(function () {
+      _logout();
+      var err = document.getElementById("ua-err-1");
+      if (err) {
+        err.textContent = "Session expirée pour inactivité. Veuillez vous reconnecter.";
+        err.classList.add("ua-visible");
+      }
+    }, _INACTIVITY_MS);
+  }
+
+  function _startInactivityWatch() {
+    ["mousemove", "keydown", "click", "touchstart", "scroll"].forEach(function (evt) {
+      document.addEventListener(evt, _resetInactivityTimer, { passive: true });
+    });
+    _resetInactivityTimer();
+  }
+
   function _finishLogin() {
     _hideOverlay();
     if (_currentUser) {
       _buildUserChip(_currentUser);
       _applyRoleRestrictions(_currentUser);
       document.dispatchEvent(new CustomEvent("cnig:login", { detail: _currentUser }));
+      _startInactivityWatch();
       _checkRgpd();
     }
   }
@@ -724,6 +788,7 @@
   function _logout() {
     if (_loggingOut) return;
     _loggingOut = true;
+    clearTimeout(_inactivityTimer);
 
     var token = _getToken();
     _clearToken(); // Efface d'abord pour couper toute récursion
@@ -751,6 +816,7 @@
     _showStep(1);
     _showOverlay();
     _loggingOut = false;
+    _buildLoginButton();
   }
 
   /* ================================================================
@@ -957,6 +1023,8 @@
       _currentUser = user;
       _buildUserChip(user);
       _applyRoleRestrictions(user);
+      document.dispatchEvent(new CustomEvent("cnig:login", { detail: user }));
+      _startInactivityWatch();
       if (user.first_login) {
         _showStep(3);
         _showOverlay();

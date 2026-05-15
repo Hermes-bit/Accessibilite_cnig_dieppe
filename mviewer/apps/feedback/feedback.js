@@ -244,9 +244,11 @@
       })
       .then(function (data) {
         if (!data) return;
-        document.getElementById("fb-count-total").textContent =
-          " (" + data.total + ")";
+        _feedbackCache = data.feedback;
+        var nouveau = data.feedback.filter(function (f) { return f.status === "nouveau"; });
+        document.getElementById("fb-count-total").textContent = " (" + nouveau.length + ")";
         _renderList(data.feedback);
+        _loadBadgeCount();
       });
   }
 
@@ -265,33 +267,87 @@
 
   function _renderList(items) {
     var container = document.getElementById("fb-list-content");
-    if (!items.length) {
-      container.innerHTML = '<p class="fb-list-empty">Aucun retour pour l\'instant.</p>';
+    var active = items.filter(function (f) { return f.status === "nouveau"; });
+    var hiddenCount = items.length - active.length;
+
+    if (!active.length) {
+      container.innerHTML = '<p class="fb-list-empty">Aucun nouveau retour.' +
+        (hiddenCount ? ' <span style="color:#94a3b8">(' + hiddenCount + ' traité' + (hiddenCount > 1 ? 's' : '') + ')</span>' : '') +
+        '</p>';
       return;
     }
 
-    container.innerHTML = items
-      .map(function (f) {
-        var d = new Date(f.created_at).toLocaleString("fr-FR");
-        return [
-          '<div class="fb-item" data-id="' + f.id + '">',
-          '  <div class="fb-item-top">',
-          '    <span class="fb-badge ' + f.severity + '">' + (_SEVERITY_LABELS[f.severity] || f.severity) + "</span>",
-          "    <strong style=\"font-size:12px;color:#475569\">" + _esc(f.feature_area || "") + "</strong>",
-          '    <span class="fb-badge-status">' + (_STATUS_LABELS[f.status] || f.status) + "</span>",
-          "  </div>",
-          '  <div class="fb-item-desc">' + _esc(f.description) + "</div>",
-          '  <div class="fb-item-meta">',
-          "    👤 " + _esc(f.reporter || "Anonyme") + " &nbsp;·&nbsp; 🖥 " + _esc(f.os_info || "") + " / " + _esc(f.browser ? f.browser.split(" — ")[0] : "") + " &nbsp;·&nbsp; 📺 " + _esc(f.screen_size || "") + " &nbsp;·&nbsp; 🕐 " + d,
-          "  </div>",
-          f.status !== "resolu"
-            ? '  <div class="fb-item-actions"><button class="fb-action-btn resolve" onclick="window._fbResolve(' + f.id + ')">✅ Résoudre</button><button class="fb-action-btn" onclick="window._fbIgnore(' + f.id + ')">Ignorer</button></div>'
-            : "",
-          "</div>",
-        ].join("\n");
-      })
-      .join("");
+    container.innerHTML = active.map(function (f) {
+      var d = new Date(f.created_at).toLocaleString("fr-FR");
+      return [
+        '<div class="fb-item" data-id="' + f.id + '">',
+        '  <div class="fb-item-top">',
+        '    <span class="fb-badge ' + f.severity + '">' + (_SEVERITY_LABELS[f.severity] || f.severity) + "</span>",
+        "    <strong style=\"font-size:12px;color:#475569\">" + _esc(f.feature_area || "") + "</strong>",
+        '    <span class="fb-badge-status">' + (_STATUS_LABELS[f.status] || f.status) + "</span>",
+        "  </div>",
+        '  <div class="fb-item-desc fb-item-desc-click" onclick="window._fbDetail(' + f.id + ')" title="Voir le détail" style="cursor:pointer">' + _esc(f.description) + '</div>',
+        '  <div class="fb-item-meta">',
+        "    👤 " + _esc(f.reporter || "Anonyme") + " &nbsp;·&nbsp; 🖥 " + _esc(f.os_info || "") + " / " + _esc(f.browser ? f.browser.split(" — ")[0] : "") + " &nbsp;·&nbsp; 📺 " + _esc(f.screen_size || "") + " &nbsp;·&nbsp; 🕐 " + d,
+        "  </div>",
+        '  <div class="fb-item-actions">',
+        '    <button class="fb-action-btn" onclick="window._fbDetail(' + f.id + ')">👁 Voir</button>',
+        '<button class="fb-action-btn" onclick="window._fbResolve(' + f.id + ')">✓ Résoudre</button>',
+        '<button class="fb-action-btn" onclick="window._fbIgnore(' + f.id + ')">✕ Ignorer</button>',
+        "  </div>",
+        "</div>",
+      ].join("\n");
+    }).join("") +
+    (hiddenCount ? '<p class="fb-ignored-count">' + hiddenCount + ' retour' + (hiddenCount > 1 ? 's' : '') + ' traité' + (hiddenCount > 1 ? 's' : '') + ' (masqué' + (hiddenCount > 1 ? 's' : '') + ')</p>' : "");
   }
+
+  /* ── Détail complet d'un retour ─────────────────────────── */
+  var _feedbackCache = [];
+
+  window._fbDetail = function (id) {
+    var f = _feedbackCache.filter(function (x) { return x.id === id; })[0];
+    if (!f) return;
+    /* Marquer comme lu : disparaît de la liste comme un mail lu */
+    var el = document.querySelector(".fb-item[data-id='" + id + "']");
+    if (el && !el.dataset.read) {
+      el.dataset.read = "1";
+      el.style.transition = "opacity 0.25s";
+      el.style.opacity = "0";
+      setTimeout(function () { if (el.parentNode) el.remove(); }, 260);
+      _patchStatus(id, "en_cours", false);
+    }
+    var d = new Date(f.created_at).toLocaleString("fr-FR");
+    var modal = document.getElementById("fb-detail-modal");
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.id = "fb-detail-modal";
+      modal.className = "fb-detail-backdrop";
+      document.body.appendChild(modal);
+    }
+    modal.innerHTML = [
+      '<div class="fb-detail-box">',
+      '  <div class="fb-detail-header">',
+      '    <span>Détail du retour #' + f.id + '</span>',
+      '    <button onclick="document.getElementById(\'fb-detail-modal\').style.display=\'none\'">&times;</button>',
+      '  </div>',
+      '  <div class="fb-detail-body">',
+      '    <div class="fb-detail-row"><label>Rapporteur</label><span>' + _esc(f.reporter || "Anonyme") + "</span></div>",
+      '    <div class="fb-detail-row"><label>Sévérité</label><span class="fb-badge ' + f.severity + '">' + (_SEVERITY_LABELS[f.severity] || f.severity) + "</span></div>",
+      '    <div class="fb-detail-row"><label>Zone</label><span>' + _esc(f.feature_area || "—") + "</span></div>",
+      '    <div class="fb-detail-row"><label>Statut</label><span>' + (_STATUS_LABELS[f.status] || f.status) + "</span></div>",
+      '    <div class="fb-detail-row"><label>Date</label><span>' + d + "</span></div>",
+      '    <div class="fb-detail-row"><label>Système</label><span>' + _esc((f.os_info || "") + " / " + (f.browser || "") + " / " + (f.screen_size || "")) + "</span></div>",
+      '    <div class="fb-detail-desc"><label>Description</label><p>' + _esc(f.description) + "</p></div>",
+      "  </div>",
+      '  <div class="fb-detail-footer">',
+      (f.status !== "resolu" ? '<button class="fb-action-btn" onclick="window._fbResolve(' + f.id + ');document.getElementById(\'fb-detail-modal\').style.display=\'none\'">✓ Résoudre</button>' : ""),
+      (f.status !== "ignore" ? '<button class="fb-action-btn" onclick="window._fbIgnore(' + f.id + ');document.getElementById(\'fb-detail-modal\').style.display=\'none\'">✕ Ignorer</button>' : ""),
+      '    <button class="fb-action-btn" onclick="document.getElementById(\'fb-detail-modal\').style.display=\'none\'">Fermer</button>',
+      "  </div>",
+      "</div>",
+    ].join("\n");
+    modal.style.display = "flex";
+  };
 
   function _esc(s) {
     return String(s)
@@ -300,25 +356,31 @@
       .replace(/>/g, "&gt;");
   }
 
+  function _fadeOutItem(id) {
+    var el = document.querySelector(".fb-item[data-id='" + id + "']");
+    if (el) {
+      el.style.transition = "opacity 0.25s";
+      el.style.opacity = "0";
+      setTimeout(function () { if (el.parentNode) el.remove(); }, 260);
+    }
+  }
+
   window._fbResolve = function (id) {
-    _patchStatus(id, "resolu");
+    _fadeOutItem(id);
+    _patchStatus(id, "resolu", false);
   };
   window._fbIgnore = function (id) {
-    _patchStatus(id, "ignore");
+    _fadeOutItem(id);
+    _patchStatus(id, "ignore", false);
   };
 
-  function _patchStatus(id, status) {
+  function _patchStatus(id, status, reload) {
     var token = _getToken();
     fetch(API_BASE + "/feedback/" + id, {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
       body: JSON.stringify({ status: status }),
-    }).then(function () {
-      _loadFeedbackList();
-    });
+    }).then(function () { if (reload !== false) _loadFeedbackList(); });
   }
 
   /* ── Open / Close ───────────────────────────────────────── */
@@ -340,6 +402,7 @@
 
     var li = document.createElement("li");
     li.id = "fb-nav-item";
+    li.className = "ms-2";
 
     li.innerHTML =
       '<button id="fb-nav-btn" class="btn btn-light mv-navbar-btn" title="Signaler un retour de test">' +
@@ -365,7 +428,7 @@
         /* Badge pour tous les utilisateurs avec controle_qualite */
         if (hasQC) {
           _loadBadgeCount();
-          setInterval(_loadBadgeCount, 60000);
+          setInterval(_loadBadgeCount, 15000);
         }
       } else if (attempts > 0) {
         setTimeout(function () {
@@ -486,19 +549,30 @@
     association_pmr:    ["consultation_carto","mode_presentation"],
   };
 
+  function _applyUser(user) {
+    var raw = (user && user.permissions && user.permissions.length > 0)
+      ? user.permissions
+      : (_DEFAULT_PERMS_FB[user && user.user_type] || []);
+    var isAdmin = user && user.user_type === "admin";
+    var hasQC = raw.indexOf("controle_qualite") !== -1;
+    if (hasQC) {
+      if (!document.getElementById("fb-nav-item")) {
+        _injectNavButton(isAdmin, hasQC);
+      }
+      _enableAdminTab();
+    }
+    if (!document.getElementById("mv-plugin-sidebar")) {
+      _setupMobileSidebar(raw);
+    }
+  }
+
   function _init() {
     _buildPanel();
     _getCurrentUser(function (user) {
-      var raw = (user && user.permissions && user.permissions.length > 0)
-        ? user.permissions
-        : (_DEFAULT_PERMS_FB[user && user.user_type] || []);
-      var isAdmin = user && user.user_type === "admin";
-      var hasQC = raw.indexOf("controle_qualite") !== -1;
-      if (hasQC) {
-        _injectNavButton(isAdmin, hasQC);
-        _enableAdminTab();
-      }
-      _setupMobileSidebar(raw);
+      _applyUser(user);
+    });
+    document.addEventListener("cnig:login", function (e) {
+      _applyUser(e.detail);
     });
   }
 
