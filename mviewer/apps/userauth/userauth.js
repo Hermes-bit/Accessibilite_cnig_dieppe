@@ -138,8 +138,43 @@
     _bindModalEvents();
   }
 
+  /** Bouton "Se connecter" affiché dans la navbar quand non authentifié. */
+  function _buildLoginButton() {
+    if (document.getElementById("ua-login-btn-nav")) return;
+    var li = document.createElement("li");
+    li.id = "ua-login-btn-nav";
+    li.className = "ms-2";
+    li.innerHTML = '<button class="btn btn-light mv-navbar-btn" id="ua-login-trigger">'
+      + '<i class="fas fa-sign-in-alt"></i>'
+      + '<span class="mv-btn-label"> Se connecter</span>'
+      + '</button>';
+
+    function _tryInject(attempts) {
+      var navRight = document.querySelector("ul.nav.navbar-nav.navbar-right")
+                 || document.querySelector("ul.navbar-nav.navbar-right")
+                 || document.querySelector("ul.navbar-nav");
+      if (navRight) {
+        var helpLi = navRight.querySelector("li.ms-3");
+        helpLi ? navRight.insertBefore(li, helpLi) : navRight.appendChild(li);
+        document.getElementById("ua-login-trigger").addEventListener("click", function () {
+          _showStep(1);
+          _showOverlay();
+        });
+      } else if (attempts > 0) {
+        setTimeout(function () { _tryInject(attempts - 1); }, 200);
+      }
+    }
+    _tryInject(20);
+  }
+
+  function _removeLoginButton() {
+    var btn = document.getElementById("ua-login-btn-nav");
+    if (btn) btn.parentNode.removeChild(btn);
+  }
+
   /** Build the user chip and inject it into the mviewer navbar (with retry). */
   function _buildUserChip(user) {
+    _removeLoginButton();
     var existing = document.getElementById("ua-user-chip");
     if (existing) existing.parentNode.removeChild(existing);
 
@@ -399,6 +434,7 @@
       _showStep(1);
       if (!_currentUser) {
         _applyRoleRestrictions(null);
+        _buildLoginButton();
       }
     });
   }
@@ -716,6 +752,7 @@
     _showStep(1);
     _showOverlay();
     _loggingOut = false;
+    _buildLoginButton();
   }
 
   /* ================================================================
