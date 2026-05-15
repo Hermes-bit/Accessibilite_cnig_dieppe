@@ -13,7 +13,7 @@ from flask_jwt_extended import (
 
 from app import db, limiter
 from app.models.user import AppUser
-from app.utils.email_service import generate_temp_password, send_temp_password
+from app.utils.email_service import generate_temp_password, send_temp_password, send_welcome_survey
 from app.utils.permissions import VALID_ROLES, ALL_PERMISSIONS
 from app.models.role_permission import RolePermission
 from . import auth_bp
@@ -143,8 +143,15 @@ def login():
     if not user or not user.is_active or not user.check_password(password):
         return jsonify({"error": "Identifiants invalides"}), 401
 
+    is_first_ever_login = user.last_login is None
     user.last_login = datetime.now(timezone.utc)
     db.session.commit()
+
+    if is_first_ever_login:
+        try:
+            send_welcome_survey(user.email, user.display_name)
+        except Exception:
+            current_app.logger.exception("Échec email bienvenue pour %s", email)
 
     access_token = create_access_token(identity=email)
     refresh_token = create_refresh_token(identity=email)

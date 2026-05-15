@@ -647,12 +647,76 @@
     });
   }
 
+  /* ================================================================
+     RGPD MODAL
+  ================================================================ */
+
+  function _buildRgpdModal() {
+    if (document.getElementById("ua-rgpd-overlay")) return;
+
+    var overlay = document.createElement("div");
+    overlay.id  = "ua-rgpd-overlay";
+
+    overlay.innerHTML = [
+      '<div id="ua-rgpd-box">',
+      '  <div id="ua-rgpd-header">',
+      '    <i class="fas fa-shield-alt"></i>',
+      '    <div>',
+      '      <h2>Protection de vos données</h2>',
+      '      <p>Conformément au Règlement Général sur la Protection des Données (RGPD)</p>',
+      '    </div>',
+      '  </div>',
+      '  <div id="ua-rgpd-body">',
+      '    <p>En utilisant la plateforme <strong>Accessibilité CNIG Dieppe</strong>, vous acceptez que les données suivantes soient collectées et traitées :</p>',
+      '    <ul>',
+      '      <li><i class="fas fa-envelope"></i> <strong>Adresse e-mail</strong> — identification et notifications</li>',
+      '      <li><i class="fas fa-clock"></i> <strong>Date et heure de connexion</strong> — sécurité du compte</li>',
+      '      <li><i class="fas fa-map-marker-alt"></i> <strong>Actions sur la carte</strong> — amélioration du service</li>',
+      '    </ul>',
+      '    <p>Ces données sont utilisées exclusivement dans le cadre de la gestion de l\'accessibilité urbaine de la ville de Dieppe. Elles ne sont jamais transmises à des tiers.</p>',
+      '    <div class="ua-rgpd-rights">',
+      '      <i class="fas fa-info-circle"></i>',
+      '      <span><strong>Vos droits :</strong> Vous pouvez demander l\'accès, la rectification ou la suppression de vos données en contactant l\'administrateur de la plateforme.</span>',
+      '    </div>',
+      '  </div>',
+      '  <div id="ua-rgpd-footer">',
+      '    <button id="ua-rgpd-accept">',
+      '      <i class="fas fa-check"></i> J\'ai compris et j\'accepte',
+      '    </button>',
+      '  </div>',
+      '</div>',
+    ].join("\n");
+
+    document.body.appendChild(overlay);
+    document.getElementById("ua-rgpd-accept").addEventListener("click", _acceptRgpd);
+  }
+
+  function _showRgpdModal() {
+    _buildRgpdModal();
+    document.getElementById("ua-rgpd-overlay").classList.add("ua-rgpd-open");
+  }
+
+  function _acceptRgpd() {
+    if (_currentUser) {
+      localStorage.setItem("cnig_rgpd_" + _currentUser.id, "1");
+    }
+    var overlay = document.getElementById("ua-rgpd-overlay");
+    if (overlay) overlay.classList.remove("ua-rgpd-open");
+  }
+
+  function _checkRgpd() {
+    if (_currentUser && !localStorage.getItem("cnig_rgpd_" + _currentUser.id)) {
+      _showRgpdModal();
+    }
+  }
+
   function _finishLogin() {
     _hideOverlay();
     if (_currentUser) {
       _buildUserChip(_currentUser);
       _applyRoleRestrictions(_currentUser);
       document.dispatchEvent(new CustomEvent("cnig:login", { detail: _currentUser }));
+      _checkRgpd();
     }
   }
 
@@ -896,6 +960,8 @@
       if (user.first_login) {
         _showStep(3);
         _showOverlay();
+      } else {
+        _checkRgpd();
       }
     })
     .catch(function () {
