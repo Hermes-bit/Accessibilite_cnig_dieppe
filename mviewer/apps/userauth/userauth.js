@@ -393,11 +393,12 @@
       if (e.key === "Enter") _onChangePassword();
     });
 
-    /* Bouton fermer le modal — uniquement si déjà connecté (changement mdp) */
+    /* Bouton fermer le modal */
     document.getElementById("ua-modal-close").addEventListener("click", function () {
-      if (_currentUser) {
-        _hideOverlay();
-        _showStep(1);
+      _hideOverlay();
+      _showStep(1);
+      if (!_currentUser) {
+        _applyRoleRestrictions(null);
       }
     });
   }
@@ -647,12 +648,39 @@
     });
   }
 
+  /* ================================================================
+     INACTIVITY TIMEOUT (5 min)
+  ================================================================ */
+  var _inactivityTimer = null;
+  var _INACTIVITY_MS = 5 * 60 * 1000;
+
+  function _resetInactivityTimer() {
+    if (!_currentUser) return;
+    clearTimeout(_inactivityTimer);
+    _inactivityTimer = setTimeout(function () {
+      _logout();
+      var err = document.getElementById("ua-err-1");
+      if (err) {
+        err.textContent = "Session expirée pour inactivité. Veuillez vous reconnecter.";
+        err.classList.add("ua-visible");
+      }
+    }, _INACTIVITY_MS);
+  }
+
+  function _startInactivityWatch() {
+    ["mousemove", "keydown", "click", "touchstart", "scroll"].forEach(function (evt) {
+      document.addEventListener(evt, _resetInactivityTimer, { passive: true });
+    });
+    _resetInactivityTimer();
+  }
+
   function _finishLogin() {
     _hideOverlay();
     if (_currentUser) {
       _buildUserChip(_currentUser);
       _applyRoleRestrictions(_currentUser);
       document.dispatchEvent(new CustomEvent("cnig:login", { detail: _currentUser }));
+      _startInactivityWatch();
     }
   }
 
@@ -660,6 +688,7 @@
   function _logout() {
     if (_loggingOut) return;
     _loggingOut = true;
+    clearTimeout(_inactivityTimer);
 
     var token = _getToken();
     _clearToken(); // Efface d'abord pour couper toute récursion
@@ -894,6 +923,7 @@
       _buildUserChip(user);
       _applyRoleRestrictions(user);
       document.dispatchEvent(new CustomEvent("cnig:login", { detail: user }));
+      _startInactivityWatch();
       if (user.first_login) {
         _showStep(3);
         _showOverlay();
