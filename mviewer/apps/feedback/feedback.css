@@ -17,9 +17,9 @@
 }
 .mv-navbar-btn:hover,
 .mv-navbar-btn:focus {
-  background: #0079c1 !important;
+  background: #0d2240 !important;
   border-color: transparent !important;
-  box-shadow: 0 4px 16px rgba(0, 121, 193, 0.40) !important;
+  box-shadow: 0 4px 16px rgba(13, 34, 64, 0.40) !important;
   transform: translateY(-1px) !important;
   outline: none !important;
   color: #fff !important;
@@ -63,7 +63,7 @@
 
 /* ── Header ───────────────────────────────────────────── */
 #fb-header {
-  background: linear-gradient(135deg, #1a3a5c 0%, #0079c1 100%);
+  background: linear-gradient(135deg, #0d2240 0%, #1a3a5c 100%);
   padding: 18px 22px;
   display: flex;
   align-items: center;
@@ -122,8 +122,8 @@
   transition: all 0.15s;
 }
 .fb-tab.active {
-  color: #0079c1;
-  border-bottom-color: #0079c1;
+  color: #1a3a5c;
+  border-bottom-color: #1a3a5c;
   background: none;
 }
 .fb-tab:hover:not(.active) {
@@ -171,9 +171,9 @@
 .fb-group input:focus,
 .fb-group select:focus,
 .fb-group textarea:focus {
-  border-color: #0079c1;
+  border-color: #1a3a5c;
   background: #fff;
-  box-shadow: 0 0 0 3px rgba(0, 121, 193, 0.10);
+  box-shadow: 0 0 0 3px rgba(26, 58, 92, 0.12);
 }
 
 .fb-group textarea {
@@ -222,7 +222,7 @@
 .fb-btn {
   width: 100%;
   padding: 13px;
-  background: linear-gradient(135deg, #0079c1 0%, #005a8e 100%);
+  background: linear-gradient(135deg, #1a3a5c 0%, #0d2240 100%);
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -230,13 +230,13 @@
   font-weight: 700;
   cursor: pointer;
   transition: opacity 0.15s, transform 0.15s, box-shadow 0.15s;
-  box-shadow: 0 4px 14px rgba(0, 121, 193, 0.25);
+  box-shadow: 0 4px 14px rgba(26, 58, 92, 0.30);
   letter-spacing: 0.2px;
 }
 .fb-btn:hover {
   opacity: 0.92;
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(0, 121, 193, 0.35);
+  box-shadow: 0 6px 20px rgba(26, 58, 92, 0.40);
 }
 .fb-btn:disabled { background: #94a3b8; cursor: not-allowed; box-shadow: none; transform: none; }
 
@@ -335,7 +335,7 @@
   color: #475569;
   transition: all 0.12s;
 }
-.fb-action-btn:hover { background: #0079c1; color: #fff; border-color: #0079c1; }
+.fb-action-btn:hover { background: #1a3a5c; color: #fff; border-color: #1a3a5c; }
 .fb-action-btn.resolve { border-color: #22c55e; color: #15803d; }
 .fb-action-btn.resolve:hover { background: #22c55e; color: #fff; border-color: #22c55e; }
 
