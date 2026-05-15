@@ -24,6 +24,8 @@
     <extension type="javascript" src="apps/styles/styles.js"/>
     <extension type="javascript" src="apps/dbexplorer/dbexplorer.js"/>
     <extension type="javascript" src="apps/tour/tour.js"/>
+    <extension type="javascript" src="apps/compass/compass.js"/>
+    <extension type="javascript" src="apps/printlayout/printlayout.js"/>
   </extensions>
 
   <baselayers style="default"/>
