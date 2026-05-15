@@ -893,6 +893,7 @@
       _currentUser = user;
       _buildUserChip(user);
       _applyRoleRestrictions(user);
+      document.dispatchEvent(new CustomEvent("cnig:login", { detail: user }));
       if (user.first_login) {
         _showStep(3);
         _showOverlay();

@@ -486,19 +486,30 @@
     association_pmr:    ["consultation_carto","mode_presentation"],
   };
 
+  function _applyUser(user) {
+    var raw = (user && user.permissions && user.permissions.length > 0)
+      ? user.permissions
+      : (_DEFAULT_PERMS_FB[user && user.user_type] || []);
+    var isAdmin = user && user.user_type === "admin";
+    var hasQC = raw.indexOf("controle_qualite") !== -1;
+    if (hasQC) {
+      if (!document.getElementById("fb-nav-item")) {
+        _injectNavButton(isAdmin, hasQC);
+      }
+      _enableAdminTab();
+    }
+    if (!document.getElementById("mv-plugin-sidebar")) {
+      _setupMobileSidebar(raw);
+    }
+  }
+
   function _init() {
     _buildPanel();
     _getCurrentUser(function (user) {
-      var raw = (user && user.permissions && user.permissions.length > 0)
-        ? user.permissions
-        : (_DEFAULT_PERMS_FB[user && user.user_type] || []);
-      var isAdmin = user && user.user_type === "admin";
-      var hasQC = raw.indexOf("controle_qualite") !== -1;
-      if (hasQC) {
-        _injectNavButton(isAdmin, hasQC);
-        _enableAdminTab();
-      }
-      _setupMobileSidebar(raw);
+      _applyUser(user);
+    });
+    document.addEventListener("cnig:login", function (e) {
+      _applyUser(e.detail);
     });
   }
 
