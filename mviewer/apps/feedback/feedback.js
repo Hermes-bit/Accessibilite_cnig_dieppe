@@ -245,9 +245,10 @@
       .then(function (data) {
         if (!data) return;
         _feedbackCache = data.feedback;
-        var active = data.feedback.filter(function (f) { return f.status !== "ignore"; });
-        document.getElementById("fb-count-total").textContent = " (" + active.length + ")";
+        var nouveau = data.feedback.filter(function (f) { return f.status === "nouveau"; });
+        document.getElementById("fb-count-total").textContent = " (" + nouveau.length + ")";
         _renderList(data.feedback);
+        _loadBadgeCount();
       });
   }
 
@@ -266,12 +267,12 @@
 
   function _renderList(items) {
     var container = document.getElementById("fb-list-content");
-    var active = items.filter(function (f) { return f.status !== "ignore"; });
-    var ignoredCount = items.length - active.length;
+    var active = items.filter(function (f) { return f.status === "nouveau"; });
+    var hiddenCount = items.length - active.length;
 
     if (!active.length) {
-      container.innerHTML = '<p class="fb-list-empty">Aucun retour actif.' +
-        (ignoredCount ? ' <span style="color:#94a3b8">(' + ignoredCount + ' ignoré' + (ignoredCount > 1 ? 's' : '') + ')</span>' : '') +
+      container.innerHTML = '<p class="fb-list-empty">Aucun nouveau retour.' +
+        (hiddenCount ? ' <span style="color:#94a3b8">(' + hiddenCount + ' traité' + (hiddenCount > 1 ? 's' : '') + ')</span>' : '') +
         '</p>';
       return;
     }
@@ -291,13 +292,13 @@
         "  </div>",
         '  <div class="fb-item-actions">',
         '    <button class="fb-action-btn" onclick="window._fbDetail(' + f.id + ')">👁 Voir</button>',
-        (f.status !== "resolu" ? '<button class="fb-action-btn" onclick="window._fbResolve(' + f.id + ')">✓ Résoudre</button>' : ""),
+        '<button class="fb-action-btn" onclick="window._fbResolve(' + f.id + ')">✓ Résoudre</button>',
         '<button class="fb-action-btn" onclick="window._fbIgnore(' + f.id + ')">✕ Ignorer</button>',
         "  </div>",
         "</div>",
       ].join("\n");
     }).join("") +
-    (ignoredCount ? '<p class="fb-ignored-count">' + ignoredCount + ' retour' + (ignoredCount > 1 ? 's' : '') + ' ignoré' + (ignoredCount > 1 ? 's' : '') + ' (masqué' + (ignoredCount > 1 ? 's' : '') + ')</p>' : "");
+    (hiddenCount ? '<p class="fb-ignored-count">' + hiddenCount + ' retour' + (hiddenCount > 1 ? 's' : '') + ' traité' + (hiddenCount > 1 ? 's' : '') + ' (masqué' + (hiddenCount > 1 ? 's' : '') + ')</p>' : "");
   }
 
   /* ── Détail complet d'un retour ─────────────────────────── */
@@ -306,6 +307,15 @@
   window._fbDetail = function (id) {
     var f = _feedbackCache.filter(function (x) { return x.id === id; })[0];
     if (!f) return;
+    /* Marquer comme lu : disparaît de la liste comme un mail lu */
+    var el = document.querySelector(".fb-item[data-id='" + id + "']");
+    if (el && !el.dataset.read) {
+      el.dataset.read = "1";
+      el.style.transition = "opacity 0.25s";
+      el.style.opacity = "0";
+      setTimeout(function () { if (el.parentNode) el.remove(); }, 260);
+      _patchStatus(id, "en_cours", false);
+    }
     var d = new Date(f.created_at).toLocaleString("fr-FR");
     var modal = document.getElementById("fb-detail-modal");
     if (!modal) {
@@ -346,20 +356,31 @@
       .replace(/>/g, "&gt;");
   }
 
-  window._fbResolve = function (id) { _patchStatus(id, "resolu"); };
-  window._fbIgnore  = function (id) {
+  function _fadeOutItem(id) {
     var el = document.querySelector(".fb-item[data-id='" + id + "']");
-    if (el) { el.style.opacity = "0"; el.style.transition = "opacity 0.3s"; setTimeout(function () { el.remove(); }, 310); }
-    _patchStatus(id, "ignore");
+    if (el) {
+      el.style.transition = "opacity 0.25s";
+      el.style.opacity = "0";
+      setTimeout(function () { if (el.parentNode) el.remove(); }, 260);
+    }
+  }
+
+  window._fbResolve = function (id) {
+    _fadeOutItem(id);
+    _patchStatus(id, "resolu", false);
+  };
+  window._fbIgnore = function (id) {
+    _fadeOutItem(id);
+    _patchStatus(id, "ignore", false);
   };
 
-  function _patchStatus(id, status) {
+  function _patchStatus(id, status, reload) {
     var token = _getToken();
     fetch(API_BASE + "/feedback/" + id, {
       method: "PATCH",
       headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
       body: JSON.stringify({ status: status }),
-    }).then(function () { _loadFeedbackList(); });
+    }).then(function () { if (reload !== false) _loadFeedbackList(); });
   }
 
   /* ── Open / Close ───────────────────────────────────────── */
@@ -407,7 +428,7 @@
         /* Badge pour tous les utilisateurs avec controle_qualite */
         if (hasQC) {
           _loadBadgeCount();
-          setInterval(_loadBadgeCount, 60000);
+          setInterval(_loadBadgeCount, 15000);
         }
       } else if (attempts > 0) {
         setTimeout(function () {
