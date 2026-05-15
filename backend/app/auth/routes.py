@@ -13,7 +13,11 @@ from flask_jwt_extended import (
 
 from app import db, limiter
 from app.models.user import AppUser
-from app.utils.email_service import generate_temp_password, send_temp_password, send_welcome_survey
+from app.utils.email_service import (
+    generate_temp_password,
+    send_temp_password,
+    send_welcome_survey,
+)
 from app.utils.permissions import VALID_ROLES, ALL_PERMISSIONS
 from app.models.role_permission import RolePermission
 from . import auth_bp

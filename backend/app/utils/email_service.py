@@ -41,15 +41,20 @@ def send_welcome_survey(email: str, display_name: str | None = None) -> None:
     """
     mail_server = os.environ.get("MAIL_SERVER", "").strip()
     if not mail_server:
-        logger.warning("[DEV MODE] Email de bienvenue/satisfaction non envoyé à %s (pas de serveur mail)", email)
+        logger.warning(
+            "[DEV MODE] Email de bienvenue/satisfaction non envoyé à %s (pas de serveur mail)",
+            email,
+        )
         return
 
-    mail_port     = int(os.environ.get("MAIL_PORT", "587"))
+    mail_port = int(os.environ.get("MAIL_PORT", "587"))
     mail_username = os.environ.get("MAIL_USERNAME", "")
     mail_password = os.environ.get("MAIL_PASSWORD", "")
-    mail_from     = os.environ.get("MAIL_FROM", mail_username)
-    survey_url    = os.environ.get("SURVEY_URL", "").strip()
-    platform_url  = os.environ.get("PLATFORM_URL", "https://hermes-bit.github.io/Accessibilite_cnig_dieppe/").strip()
+    mail_from = os.environ.get("MAIL_FROM", mail_username)
+    survey_url = os.environ.get("SURVEY_URL", "").strip()
+    platform_url = os.environ.get(
+        "PLATFORM_URL", "https://hermes-bit.github.io/Accessibilite_cnig_dieppe/"
+    ).strip()
 
     prenom = display_name or email.split("@")[0]
     subject = "Bienvenue sur la plateforme Accessibilité CNIG Dieppe"
@@ -148,8 +153,8 @@ def send_welcome_survey(email: str, display_name: str | None = None) -> None:
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
-    msg["From"]    = mail_from
-    msg["To"]      = email
+    msg["From"] = mail_from
+    msg["To"] = email
     msg.attach(MIMEText(html_body, "html", "utf-8"))
 
     try:
