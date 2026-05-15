@@ -340,6 +340,10 @@
 .fb-action-btn.resolve:hover { background: #22c55e; color: #fff; border-color: #22c55e; }
 
 /* ── Navbar button ────────────────────────────────────── */
+#fb-nav-item {
+  border-left: none !important;
+}
+
 #fb-nav-btn {
   position: relative;
 }
