@@ -340,6 +340,7 @@
 
     var li = document.createElement("li");
     li.id = "fb-nav-item";
+    li.className = "ms-2";
 
     li.innerHTML =
       '<button id="fb-nav-btn" class="btn btn-light mv-navbar-btn" title="Signaler un retour de test">' +
