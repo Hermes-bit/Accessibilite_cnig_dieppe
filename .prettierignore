@@ -1,0 +1,9 @@
+*.min*
+*.css
+*.mst
+**/lib
+templates.js
+**/.git
+demo/tile/*
+**/addons
+**/demo

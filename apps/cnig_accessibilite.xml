@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+  <application
+    title="Accessibilité CNIG"
+    lang="fr"
+    showhelp="false"
+    stats="false"
+  />
+
+  <mapoptions
+    projection="EPSG:3857"
+    center="119879,6432658"
+    zoom="14"
+    minzoom="6"
+    maxzoom="20"
+    projextent="-20037508.3428,-20037508.3428,20037508.3428,20037508.3428"
+  />
+
+  <proxy url="/proxy/?url=" useproxy="false" />
+
+  <extensions>
+    <extension type="javascript" src="apps/userauth/userauth.js"/>
+    <extension type="javascript" src="apps/routing/routing.js"/>
+    <extension type="javascript" src="apps/styles/styles.js"/>
+    <extension type="javascript" src="apps/dbexplorer/dbexplorer.js"/>
+    <extension type="javascript" src="apps/tour/tour.js"/>
+    <extension type="javascript" src="apps/feedback/feedback.js"/>
+  </extensions>
+
+  <baselayers style="default">
+
+    <!-- OpenStreetMap standard -->
+    <baselayer
+      type="OSM"
+      label="OpenStreetMap"
+      title="Fond de plan OpenStreetMap"
+      visible="true"
+      thumbnail="https://tile.openstreetmap.org/14/8235/5551.png"
+    />
+
+    <!-- Fond clair CartoDB -->
+    <baselayer
+      type="OSM"
+      label="Fond clair"
+      title="CartoDB Positron — fond clair"
+      url="https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
+      visible="false"
+      thumbnail="https://a.basemaps.cartocdn.com/light_all/14/8235/5551.png"
+    />
+
+    <!-- Imagerie satellite Esri -->
+    <baselayer
+      type="OSM"
+      label="Satellite"
+      title="Esri World Imagery — vue satellite"
+      url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+      visible="false"
+      thumbnail="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/14/5551/8235"
+    />
+
+  </baselayers>
+
+  <themes>
+
+    <!-- ═══════════════════════════════════════════════════
+         CHEMINEMENTS  (712 tronçons · 765 nœuds · 304 traversées)
+    ═══════════════════════════════════════════════════ -->
+    <theme name="Cheminements" id="cheminements" collapsed="false" icon="fas fa-walking">
+
+      <!-- Vue enrichie avec libellés et couleur d'accessibilité -->
+      <layer
+        id="troncons"
+        name="Tronçons de cheminement (712)"
+        url="https://hermes58.alwaysdata.net/api/v1/layers/v_troncons"
+        type="geojson"
+        visible="true"
+        queryable="true"
+        opacity="1"
+        attribution="CNIG Accessibilité"
+        fields="idtroncon,typetroncon_libelle,statutvoie_libelle,largeurutile,pente,devers,typesol_libelle,etat_libelle,accessibiliteglobale,niveau_acces_calcule,nb_obstacles,longueur"
+        aliases="Identifiant,Type,Statut voie,Largeur utile (m),Pente (%),Dévers (%),Type sol,État revêtement,Accessibilité globale,Niveau accès,Nb obstacles,Longueur (m)"
+        tooltip="true"
+        cluster="false"
+      />
+
+      <layer
+        id="noeuds"
+        name="Nœuds de cheminement (765)"
+        url="https://hermes58.alwaysdata.net/api/v1/layers/noeud_cheminement"
+        type="geojson"
+        visible="false"
+        queryable="true"
+        opacity="1"
+        attribution="CNIG Accessibilité"
+        fields="idnoeud,bandeeveilvigilance,controlebev,bandeinterception,masquecovisibilite,hauteurressaut,altitude"
+        aliases="Identifiant,Bande éveil vigilance,Contrôle BEV,Bande interception,Masque covisibilité,Hauteur ressaut,Altitude"
+        tooltip="true"
+      />
+
+      <layer
+        id="traversees"
+        name="Traversées (304)"
+        url="https://hermes58.alwaysdata.net/api/v1/layers/traversee"
+        type="geojson"
+        visible="true"
+        queryable="true"
+        opacity="1"
+        attribution="CNIG Accessibilité"
+        fields="idtraversee,typetroncon,etatrevetement,bandesblanches,etatmarquage,eclairage,feupietons,aidesonore,reperelineaire,masquecovisibilite,voiestraversees"
+        aliases="Identifiant,Type,État revêtement,Bandes blanches,État marquage,Éclairage,Feu piétons,Aide sonore,Repère linéaire,Masque covisibilité,Nb voies traversées"
+        tooltip="true"
+      />
+
+      <!-- Vue enrichie avec libellés et couleur obstacle -->
+      <layer
+        id="obstacles"
+        name="Obstacles (3017)"
+        url="https://hermes58.alwaysdata.net/api/v1/layers/v_obstacles?limit=5000"
+        type="geojson"
+        visible="true"
+        queryable="true"
+        opacity="1"
+        attribution="CNIG Accessibilité"
+        fields="idobstacle,type_libelle,position_libelle,largeurutile,longueurobstacle,largeurobstacle,hauteurobsposesol,hauteursousobs,reperabilitevisuelle,commentaire"
+        aliases="Identifiant,Type obstacle,Position,Largeur utile (m),Longueur obstacle,Largeur obstacle,Hauteur / sol,Hauteur sous obstacle,Repérabilité visuelle,Commentaire"
+        tooltip="true"
+        cluster="true"
+      />
+
+      <layer
+        id="circulation"
+        name="Zones de circulation (585)"
+        url="https://hermes58.alwaysdata.net/api/v1/layers/circulation"
+        type="geojson"
+        visible="false"
+        queryable="true"
+        opacity="0.6"
+        attribution="CNIG Accessibilité"
+        fields="idcirculation,typetroncon,statutvoie,largeurutile,pente,devers,typesol,etatrevetement,eclairage,typepassage,couvert,longueur"
+        aliases="Identifiant,Type,Statut voie,Largeur utile (m),Pente (%),Dévers (%),Type sol,État revêtement,Éclairage,Type passage,Couvert,Longueur (m)"
+        tooltip="true"
+      />
+
+    </theme>
+
+    <!-- ═══════════════════════════════════════════════════
+         ÉQUIPEMENTS D'ACCESSIBILITÉ
+    ═══════════════════════════════════════════════════ -->
+    <theme name="Équipements d'accessibilité" id="equipements" collapsed="true" icon="fas fa-wheelchair">
+
+      <layer
+        id="escaliers"
+        name="Escaliers (15)"
+        url="https://hermes58.alwaysdata.net/api/v1/layers/escalier"
+        type="geojson"
+        visible="true"
+        queryable="true"
+        opacity="1"
+        attribution="CNIG Accessibilité"
+        fields="idescalier,typetroncon,statutvoie,etatrevetement,maincourante,dispositifvigilance,contrastevisuel,largeurutile,nbmarches,hauteurmarche,giron,pente"
+        aliases="Identifiant,Type,Statut voie,État revêtement,Main courante,Dispositif vigilance,Contraste visuel,Largeur utile (m),Nb marches,Hauteur marche,Giron,Pente (%)"
+        tooltip="true"
+      />
+
+      <layer
+        id="rampes"
+        name="Rampes (28)"
+        url="https://hermes58.alwaysdata.net/api/v1/layers/rampe"
+        type="geojson"
+        visible="true"
+        queryable="true"
+        opacity="1"
+        attribution="CNIG Accessibilité"
+        fields="idrampe,typetroncon,statutvoie,etatrevetement,largeurutile,maincourante,pente,devers,chasseroue,airerotation,distpalierrepos"
+        aliases="Identifiant,Type,Statut voie,État revêtement,Largeur utile (m),Main courante,Pente (%),Dévers (%),Chasse-roue,Aire rotation,Distance palier repos (m)"
+        tooltip="true"
+      />
+
+      <layer
+        id="quais"
+        name="Quais (58)"
+        url="https://hermes58.alwaysdata.net/api/v1/layers/quai"
+        type="geojson"
+        visible="false"
+        queryable="true"
+        opacity="1"
+        attribution="CNIG Accessibilité"
+        fields="idquai,typetroncon,statutvoie,etatrevetement,hauteur,largeurpassage,signalisationporte,dispositifvigilance,diamzonemanoeuvre,longueur"
+        aliases="Identifiant,Type,Statut voie,État revêtement,Hauteur (m),Largeur passage (m),Signalisation porte,Dispositif vigilance,Diam. zone manœuvre,Longueur (m)"
+        tooltip="true"
+      />
+
+      <layer
+        id="passage_selectif"
+        name="Passages sélectifs (1)"
+        url="https://hermes58.alwaysdata.net/api/v1/layers/passage_selectif"
+        type="geojson"
+        visible="true"
+        queryable="true"
+        opacity="1"
+        attribution="CNIG Accessibilité"
+        fields="idpassageselectif,bandeeveilvigilance,hauteurressaut,controlebev,bandeinterception,passagemecanique,largeurutile,profondeur,contrastevisuel"
+        aliases="Identifiant,Bande éveil vigilance,Hauteur ressaut,Contrôle BEV,Bande interception,Passage mécanique,Largeur utile (m),Profondeur,Contraste visuel"
+        tooltip="true"
+      />
+
+    </theme>
+
+    <!-- ═══════════════════════════════════════════════════
+         STATIONNEMENT PMR  (46 places)
+    ═══════════════════════════════════════════════════ -->
+    <theme name="Stationnement PMR" id="stationnement" collapsed="true" icon="fas fa-parking">
+
+      <layer
+        id="stationnements_pmr"
+        name="Stationnements PMR (46)"
+        url="https://hermes58.alwaysdata.net/api/v1/layers/stationnement_pmr"
+        type="geojson"
+        visible="true"
+        queryable="true"
+        opacity="0.7"
+        attribution="CNIG Accessibilité"
+        fields="idstationnement,typestationnement,etatrevetement,typesol,largeurstat,longueurstat,bandlatsecurite,surlongueur,signalpmr,marquagesol,pente,devers"
+        aliases="Identifiant,Type stationnement,État revêtement,Type sol,Largeur (m),Longueur (m),Bande latérale sécurité,Sur-longueur,Signal PMR,Marquage sol,Pente (%),Dévers (%)"
+        tooltip="true"
+      />
+
+    </theme>
+
+    <!-- ═══════════════════════════════════════════════════
+         ERP & ENTRÉES  (89 entrées)
+         NB : la table erp est vide pour l'instant
+    ═══════════════════════════════════════════════════ -->
+    <theme name="Entrées ERP" id="erp" collapsed="true" icon="fas fa-door-open">
+
+      <layer
+        id="entrees"
+        name="Entrées ERP (89)"
+        url="https://hermes58.alwaysdata.net/api/v1/layers/entree"
+        type="geojson"
+        visible="true"
+        queryable="true"
+        opacity="1"
+        attribution="CNIG Accessibilité"
+        fields="identree,iderp,adresse,typeentree,rampe,ascenseur,escaliernbmarche,largeurpassage,typeporte,typeouverture,espacemanoeuvre,bandeeveilvigilance,eclairage,controleacces"
+        aliases="Identifiant,ERP associé,Adresse,Type entrée,Rampe,Ascenseur,Nb marches escalier,Largeur passage (m),Type porte,Type ouverture,Espace manœuvre,Bande éveil vigilance,Éclairage,Contrôle accès"
+        tooltip="true"
+        cluster="true"
+      />
+
+    </theme>
+
+  </themes>
+</config>

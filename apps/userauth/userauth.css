@@ -1,0 +1,966 @@
+/* =============================================================
+   userauth.css Authentification CNIG Accessibilité
+   Style inspiré ArcGIS Online (dark navy + blanc)
+
+/* ── Modale RGPD ────────────────────────────────────────── */
+#ua-rgpd-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 9500;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(3px);
+  padding: 16px;
+}
+#ua-rgpd-overlay.ua-rgpd-open {
+  display: flex;
+  animation: ua-rgpd-in 0.25s ease;
+}
+@keyframes ua-rgpd-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+#ua-rgpd-box {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.28);
+  width: 100%;
+  max-width: 520px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+#ua-rgpd-header {
+  background: linear-gradient(135deg, #0d2240 0%, #1a3a5c 100%);
+  padding: 22px 26px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+#ua-rgpd-header i {
+  font-size: 28px;
+  color: rgba(255,255,255,0.85);
+  flex-shrink: 0;
+}
+#ua-rgpd-header h2 {
+  margin: 0 0 3px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  font-family: system-ui, Arial, sans-serif;
+}
+#ua-rgpd-header p {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(255,255,255,0.65);
+  font-family: system-ui, Arial, sans-serif;
+}
+
+#ua-rgpd-body {
+  padding: 24px 26px 16px;
+  font-family: system-ui, Arial, sans-serif;
+  font-size: 14px;
+  color: #2d3748;
+  line-height: 1.6;
+}
+#ua-rgpd-body p { margin: 0 0 14px; }
+#ua-rgpd-body ul {
+  margin: 0 0 16px;
+  padding-left: 0;
+  list-style: none;
+}
+#ua-rgpd-body ul li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+#ua-rgpd-body ul li i {
+  color: #1a3a5c;
+  font-size: 14px;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.ua-rgpd-rights {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #1e40af;
+  line-height: 1.5;
+}
+.ua-rgpd-rights i { color: #3b82f6; font-size: 15px; flex-shrink: 0; margin-top: 2px; }
+
+#ua-rgpd-footer {
+  padding: 16px 26px 22px;
+  border-top: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+#ua-rgpd-accept {
+  width: 100%;
+  padding: 13px;
+  background: linear-gradient(135deg, #1a3a5c 0%, #0d2240 100%);
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: opacity 0.15s, transform 0.15s;
+  box-shadow: 0 4px 14px rgba(26,58,92,0.30);
+}
+#ua-rgpd-accept:hover {
+  opacity: 0.90;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 560px) {
+  #ua-rgpd-box { border-radius: 10px; }
+  #ua-rgpd-header { padding: 18px 20px; }
+  #ua-rgpd-body   { padding: 18px 20px 12px; }
+  #ua-rgpd-footer { padding: 12px 20px 18px; }
+}
+/* ─────────────────────────────────────────────────────────── */
+   ============================================================= */
+
+/* ── Variables ─────────────────────────────────────────── */
+:root {
+  --ua-navy:        #1a3a5c;
+  --ua-navy-light:  #254d7a;
+  --ua-blue:        #0079c1;
+  --ua-blue-hover:  #005a8e;
+  --ua-bg:          #f4f6f9;
+  --ua-white:       #ffffff;
+  --ua-border:      #c8d8ea;
+  --ua-text:        #333333;
+  --ua-text-muted:  #666666;
+  --ua-shadow:      0 4px 24px rgba(0, 0, 0, 0.25);
+  --ua-radius:      8px;
+
+  /* badges user_type */
+  --ua-viewer-bg:   #e0e0e0;
+  --ua-viewer-fg:   #555555;
+  --ua-editor-bg:   #dbeafe;
+  --ua-editor-fg:   #1d4ed8;
+  --ua-creator-bg:  #dcfce7;
+  --ua-creator-fg:  #15803d;
+  --ua-admin-bg:    #fee2e2;
+  --ua-admin-fg:    #b91c1c;
+}
+
+/* ── Overlay plein écran ───────────────────────────────── */
+#ua-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+}
+
+#ua-overlay.ua-hidden {
+  display: none;
+}
+
+/* ── Modal ─────────────────────────────────────────────── */
+#ua-modal {
+  background: var(--ua-white);
+  border-radius: var(--ua-radius);
+  box-shadow: var(--ua-shadow);
+  width: 380px;
+  max-width: calc(100vw - 32px);
+  overflow: hidden;
+  animation: ua-pop-in 0.2s ease-out;
+}
+
+@keyframes ua-pop-in {
+  from { transform: scale(0.94) translateY(-8px); opacity: 0; }
+  to   { transform: scale(1)    translateY(0);    opacity: 1; }
+}
+
+/* ── Modal header ──────────────────────────────────────── */
+#ua-modal-header {
+  background: var(--ua-navy);
+  padding: 24px 28px 20px;
+  text-align: center;
+  position: relative;
+}
+
+/* ── Bouton fermer (croix) ─────────────────────────────── */
+.ua-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ua-modal-close:hover,
+.ua-modal-close:focus {
+  background: rgba(255, 255, 255, 0.28);
+  outline: none;
+}
+
+#ua-modal-header .ua-logo-icon {
+  font-size: 32px;
+  color: var(--ua-white);
+  margin-bottom: 8px;
+}
+
+#ua-modal-header h2 {
+  margin: 0 0 4px;
+  color: var(--ua-white);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+#ua-modal-header p {
+  margin: 0;
+  color: #a8c4e0;
+  font-size: 12px;
+}
+
+/* ── Modal body ────────────────────────────────────────── */
+#ua-modal-body {
+  padding: 28px;
+}
+
+/* Steps */
+.ua-step {
+  display: none;
+}
+.ua-step.ua-active {
+  display: block;
+}
+
+.ua-step h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+  color: var(--ua-navy);
+  font-weight: 700;
+}
+
+.ua-step p.ua-hint {
+  margin: 0 0 18px;
+  font-size: 13px;
+  color: var(--ua-text-muted);
+  line-height: 1.5;
+}
+
+/* ── Form elements ─────────────────────────────────────── */
+.ua-form-group {
+  margin-bottom: 16px;
+}
+
+.ua-form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ua-text);
+  margin-bottom: 6px;
+}
+
+.ua-form-group input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--ua-border);
+  border-radius: 5px;
+  font-size: 14px;
+  color: var(--ua-text);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.ua-form-group input:focus {
+  border-color: var(--ua-blue);
+  box-shadow: 0 0 0 2px rgba(0, 121, 193, 0.15);
+}
+
+/* ── Email display (step 2) ────────────────────────────── */
+.ua-email-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  background: var(--ua-bg);
+  border: 1px solid var(--ua-border);
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--ua-text-muted);
+  margin-bottom: 16px;
+  word-break: break-all;
+}
+
+.ua-email-display::before {
+  content: "\f0e0";
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  font-size: 11px;
+  color: var(--ua-blue);
+  flex-shrink: 0;
+}
+
+/* ── Link row ───────────────────────────────────────────── */
+.ua-link-row {
+  text-align: center;
+  margin: 12px 0 4px;
+}
+
+.ua-btn-link {
+  background: none;
+  border: none;
+  color: var(--ua-blue);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s;
+}
+
+.ua-btn-link:hover {
+  color: var(--ua-blue-hover);
+}
+
+/* ── Buttons ───────────────────────────────────────────── */
+.ua-btn {
+  display: inline-block;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+  text-align: center;
+}
+
+.ua-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ua-btn-primary {
+  background: var(--ua-blue);
+  color: var(--ua-white);
+  width: 100%;
+}
+
+.ua-btn-primary:hover:not(:disabled) {
+  background: var(--ua-blue-hover);
+}
+
+.ua-btn-secondary {
+  background: #e8edf3;
+  color: var(--ua-text);
+  width: 100%;
+  margin-top: 8px;
+}
+
+.ua-btn-secondary:hover:not(:disabled) {
+  background: #d0dae6;
+}
+
+/* ── Error message ─────────────────────────────────────── */
+.ua-error {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+  border-radius: 5px;
+  padding: 10px 12px;
+  font-size: 13px;
+  margin-bottom: 14px;
+  display: none;
+}
+.ua-error.ua-visible {
+  display: block;
+}
+
+.ua-success {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+  border-radius: 5px;
+  padding: 10px 12px;
+  font-size: 13px;
+  margin-bottom: 14px;
+  display: none;
+}
+.ua-success.ua-visible {
+  display: block;
+}
+
+/* ── Spinner ───────────────────────────────────────────── */
+.ua-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: ua-spin 0.6s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+@keyframes ua-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Séparateur navbar ─────────────────────────────────── */
+.ua-nav-sep {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  list-style: none;
+}
+.ua-nav-sep::after {
+  content: "";
+  display: block;
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 1px;
+}
+
+/* ── User chip (navbar) ────────────────────────────────── */
+#ua-user-chip {
+  position: relative;
+}
+
+#ua-user-chip > a.ua-chip-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 10px 4px 5px;
+  cursor: pointer;
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 20px;
+  transition: background 0.15s;
+}
+
+#ua-user-chip > a.ua-chip-toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.ua-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #0079c1;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  letter-spacing: 0;
+}
+
+/* ── Badges user_type ──────────────────────────────────── */
+.ua-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ua-badge-admin              { background: rgba(239,68,68,0.30);   color: #fecaca; }
+.ua-badge-agent_sig          { background: rgba(59,130,246,0.35);  color: #bfdbfe; }
+.ua-badge-agent_voirie       { background: rgba(245,158,11,0.35);  color: #fde68a; }
+.ua-badge-agent_collectivite { background: rgba(34,197,94,0.30);   color: #bbf7d0; }
+.ua-badge-prestataire        { background: rgba(168,85,247,0.30);  color: #e9d5ff; }
+.ua-badge-association_pmr    { background: rgba(255,255,255,0.15); color: #e0e0e0; }
+
+/* ── Onglets admin ─────────────────────────────────────── */
+#ua-admin-tabs {
+  display: flex;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+  flex-shrink: 0;
+}
+
+.ua-atab {
+  padding: 11px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.ua-atab.active { color: #0079c1; border-bottom-color: #0079c1; }
+.ua-atab:hover:not(.active) { color: #334155; background: #f1f5f9; }
+
+/* ── Matrice permissions ───────────────────────────────── */
+.ua-perms-wrap { padding: 4px 0; }
+
+.ua-perms-hint {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 14px;
+}
+
+.ua-perm-row {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: #fafbfc;
+}
+
+.ua-perm-role {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 10px;
+}
+
+.ua-perm-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.ua-perm-check {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #475569;
+  cursor: pointer;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 4px 9px;
+  transition: background 0.12s;
+}
+.ua-perm-check:has(input:checked) {
+  background: #dbeafe;
+  border-color: #3b82f6;
+  color: #1d4ed8;
+}
+.ua-perm-check input { width: 13px; height: 13px; cursor: pointer; accent-color: #0079c1; }
+
+/* ── Bouton enregistrer ligne utilisateur ──────────────── */
+.ua-save-row {
+  padding: 4px 11px;
+  border-radius: 7px;
+  border: 1.5px solid #e2e8f0;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #fff;
+  color: #64748b;
+  white-space: nowrap;
+  transition: all 0.12s;
+}
+.ua-save-row.ua-save-pending {
+  border-color: #0079c1;
+  color: #0079c1;
+  background: #eff6ff;
+}
+.ua-save-row:hover { background: #0079c1; color: #fff; border-color: #0079c1; }
+.ua-save-row:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.ua-perm-save-btn {
+  padding: 5px 14px;
+  border-radius: 7px;
+  border: 1.5px solid #0079c1;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #fff;
+  color: #0079c1;
+  transition: all 0.12s;
+}
+.ua-perm-save-btn:hover { background: #0079c1; color: #fff; }
+.ua-perm-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Chip dropdown menu ────────────────────────────────── */
+.ua-chip-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 210px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  z-index: 8500;
+  overflow: hidden;
+  display: none;
+}
+
+.ua-chip-menu.ua-open {
+  display: block;
+  animation: ua-pop-in 0.15s ease-out;
+}
+
+.ua-chip-menu-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 11px 16px;
+  font-size: 13px;
+  color: #334155;
+  background: none;
+  border: none;
+  border-top: 1px solid #f1f5f9;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.1s;
+  box-sizing: border-box;
+}
+
+.ua-chip-menu-item:first-child {
+  border-top: none;
+}
+
+.ua-chip-menu-item:hover {
+  background: #f8fafc;
+}
+
+.ua-chip-menu-item.ua-danger {
+  color: #dc2626;
+}
+
+.ua-chip-menu-item.ua-danger:hover {
+  background: #fff1f2;
+}
+
+.ua-chip-menu-item i {
+  width: 16px;
+  margin-right: 10px;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.ua-chip-menu-item.ua-danger i {
+  color: #f87171;
+}
+
+/* ── Admin panel ────────────────────────────────────────── */
+#ua-admin-panel {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 8800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+}
+
+#ua-admin-panel.ua-hidden {
+  display: none;
+}
+
+#ua-admin-inner {
+  background: var(--ua-white);
+  border-radius: var(--ua-radius);
+  box-shadow: var(--ua-shadow);
+  width: 860px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 64px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: ua-pop-in 0.2s ease-out;
+}
+
+#ua-admin-header {
+  background: var(--ua-navy);
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#ua-admin-header h2 {
+  margin: 0;
+  color: var(--ua-white);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+#ua-admin-close {
+  background: none;
+  border: none;
+  color: #a8c4e0;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+#ua-admin-close:hover {
+  color: var(--ua-white);
+}
+
+#ua-admin-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Admin table */
+#ua-admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+#ua-admin-table th {
+  background: var(--ua-bg);
+  color: var(--ua-navy);
+  font-weight: 700;
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 2px solid var(--ua-border);
+  white-space: nowrap;
+}
+
+#ua-admin-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #edf1f7;
+  vertical-align: middle;
+  color: var(--ua-text);
+}
+
+#ua-admin-table tr:last-child td {
+  border-bottom: none;
+}
+
+#ua-admin-table tr:hover td {
+  background: #f8fafc;
+}
+
+/* Type selector in admin table */
+.ua-type-select {
+  padding: 4px 8px;
+  border: 1px solid var(--ua-border);
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  background: var(--ua-white);
+  color: var(--ua-text);
+  transition: border-color 0.15s;
+}
+
+.ua-type-select:focus {
+  border-color: var(--ua-blue);
+}
+
+/* Active toggle in admin table */
+.ua-active-toggle {
+  appearance: none;
+  width: 36px;
+  height: 20px;
+  background: #d0d5dd;
+  border-radius: 10px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+  vertical-align: middle;
+}
+
+.ua-active-toggle:checked {
+  background: var(--ua-blue);
+}
+
+.ua-active-toggle::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.ua-active-toggle:checked::after {
+  transform: translateX(16px);
+}
+
+/* ── Responsive mobile ─────────────────────────────────── */
+@media (max-width: 767px) {
+
+  /* Masquer les labels texte des boutons navbar — garder seulement l'icône */
+  .mv-btn-label {
+    display: none;
+  }
+
+  /* Boutons navbar plus compacts (icône seule) */
+  .mv-navbar-btn {
+    padding: 6px 10px;
+  }
+
+  /* Masquer le badge de rôle sur mobile pour gagner de la place */
+  #ua-user-chip .ua-badge {
+    display: none;
+  }
+
+  /* Chip plus compact */
+  #ua-user-chip > a.ua-chip-toggle {
+    padding: 4px 6px;
+    gap: 4px;
+  }
+
+  /* Modal login — plein écran mobile avec scroll si clavier ouvert */
+  #ua-overlay {
+    align-items: flex-start;
+    padding: 16px 12px;
+    padding-top: max(16px, env(safe-area-inset-top, 16px));
+    padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+    overflow-y: auto;
+  }
+
+  #ua-modal {
+    width: 100%;
+    max-width: 420px;
+    margin: auto;
+    flex-shrink: 0;
+  }
+
+  #ua-modal-header {
+    padding: 20px 24px 18px;
+  }
+
+  #ua-modal-body {
+    padding: 20px 18px;
+  }
+
+  /* Panel admin plein écran */
+  #ua-admin-inner {
+    width: calc(100vw - 16px);
+    max-height: calc(100vh - 16px);
+    border-radius: 8px;
+  }
+
+  #ua-admin-body {
+    padding: 12px;
+    overflow-x: auto;
+  }
+
+  /* Table admin scrollable horizontalement */
+  #ua-admin-table {
+    font-size: 12px;
+    min-width: 480px;
+  }
+
+  #ua-admin-table th,
+  #ua-admin-table td {
+    padding: 8px 8px;
+  }
+
+  /* Menu dropdown chip : centré sur l'écran en mobile */
+  .ua-chip-menu {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    right: auto;
+    min-width: 240px;
+    max-width: calc(100vw - 32px);
+    border-radius: 14px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
+    z-index: 9999;
+  }
+}
+
+@media (max-width: 480px) {
+  #ua-modal-header {
+    padding: 16px 18px 14px;
+  }
+
+  #ua-modal-header h2 {
+    font-size: 15px;
+  }
+
+  #ua-modal-header .ua-logo-icon {
+    font-size: 26px;
+  }
+
+  .ua-btn {
+    padding: 14px;
+    font-size: 16px;
+  }
+
+  /* Champs de saisie plus grands pour les doigts */
+  .ua-form-group input {
+    padding: 13px 14px;
+    font-size: 16px; /* évite le zoom auto sur iOS */
+  }
+}
+
+/* ── iPhone Pro Max (430px+) et grandes phablettes ──────── */
+@media (min-width: 390px) and (max-width: 767px) {
+  #ua-modal {
+    max-width: 400px;
+  }
+
+  .ua-modal-close {
+    top: 14px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    font-size: 22px;
+  }
+}
+
