@@ -31,7 +31,10 @@ const RoutingComponent = (function () {
         panel.innerHTML = `
         <div class="rp-header">
             <i class="fas fa-route"></i>
-            <span>Itinéraire accessible</span>
+            <div class="rp-header-text">
+                <span>Itinéraire accessible</span>
+                <small>Calcul personnalisé selon votre profil</small>
+            </div>
             <button id="rp-close" title="Fermer" aria-label="Fermer">×</button>
         </div>
         <div class="rp-body">
