@@ -25,6 +25,7 @@
     <extension type="javascript" src="apps/dbexplorer/dbexplorer.js"/>
     <extension type="javascript" src="apps/tour/tour.js"/>
     <extension type="javascript" src="apps/feedback/feedback.js"/>
+    <extension type="javascript" src="apps/compass/compass.js"/>
   </extensions>
 
   <baselayers style="default">
