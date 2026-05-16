@@ -555,10 +555,13 @@
       : (_DEFAULT_PERMS_FB[user && user.user_type] || []);
     var isAdmin = user && user.user_type === "admin";
     var hasQC = raw.indexOf("controle_qualite") !== -1;
+
+    /* Bouton visible pour tous (connectés ou non) */
+    if (!document.getElementById("fb-nav-item")) {
+      _injectNavButton(isAdmin, hasQC);
+    }
+    /* Onglet liste + badge uniquement pour les rôles controle_qualite */
     if (hasQC) {
-      if (!document.getElementById("fb-nav-item")) {
-        _injectNavButton(isAdmin, hasQC);
-      }
       _enableAdminTab();
     }
     if (!document.getElementById("mv-plugin-sidebar")) {
