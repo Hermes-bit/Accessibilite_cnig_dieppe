@@ -417,9 +417,10 @@
         document.querySelector("ul.navbar-nav.navbar-right") ||
         document.querySelector("ul.navbar-nav");
       if (navRight) {
-        var chip = document.getElementById("ua-user-chip");
-        if (chip) {
-          navRight.insertBefore(li, chip);
+        var anchor = document.getElementById("ua-user-chip")
+                  || document.getElementById("ua-login-btn-nav");
+        if (anchor) {
+          navRight.insertBefore(li, anchor);
         } else {
           navRight.appendChild(li);
         }
