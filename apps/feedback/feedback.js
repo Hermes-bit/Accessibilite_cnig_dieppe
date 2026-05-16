@@ -465,10 +465,10 @@
       });
   }
 
-  /* ── Admin tab injection (if admin) ───────────────────── */
-  function _enableAdminTab() {
+  /* ── Admin tab (visible uniquement pour admin) ────────── */
+  function _setAdminTab(show) {
     var tabs = document.getElementById("fb-tabs");
-    if (tabs) tabs.style.display = "flex";
+    if (tabs) tabs.style.display = show ? "flex" : "none";
   }
 
   /* ── Sidebar mobile (boutons plugin à gauche) ──────────── */
@@ -561,10 +561,8 @@
     if (!document.getElementById("fb-nav-item")) {
       _injectNavButton(isAdmin, hasQC);
     }
-    /* Onglet "Tous les retours" uniquement pour les admins */
-    if (isAdmin) {
-      _enableAdminTab();
-    }
+    /* Onglet "Tous les retours" : visible uniquement pour les admins */
+    _setAdminTab(isAdmin);
     if (!document.getElementById("mv-plugin-sidebar")) {
       _setupMobileSidebar(raw);
     }
