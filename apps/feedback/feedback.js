@@ -69,7 +69,7 @@
       '<div id="fb-panel">',
       "  <div id=\"fb-header\">",
       "    <i class=\"fas fa-clipboard-list\"></i>",
-      "    <h2 id=\"fb-title\">Recettage — Signaler un retour</h2>",
+      "    <h2 id=\"fb-title\">Signaler un retour</h2>",
       "    <button id=\"fb-close\" title=\"Fermer\">&times;</button>",
       "  </div>",
       '  <div id="fb-tabs" style="display:none">',
@@ -407,7 +407,7 @@
     li.innerHTML =
       '<button id="fb-nav-btn" class="btn btn-light mv-navbar-btn" title="Signaler un retour de test">' +
       '<i class="fas fa-clipboard-list"></i>' +
-      '<span class="mv-btn-label"> Recettage</span>' +
+      '<span class="mv-btn-label"> Signaler un retour</span>' +
       '<span id="fb-count-badge"></span>' +
       "</button>";
 
@@ -561,8 +561,8 @@
     if (!document.getElementById("fb-nav-item")) {
       _injectNavButton(isAdmin, hasQC);
     }
-    /* Onglet liste + badge uniquement pour les rôles controle_qualite */
-    if (hasQC) {
+    /* Onglet "Tous les retours" uniquement pour les admins */
+    if (isAdmin) {
       _enableAdminTab();
     }
     if (!document.getElementById("mv-plugin-sidebar")) {
