@@ -86,7 +86,7 @@
       + '<div id="ua-modal-header">'
       + '<button id="ua-modal-close" class="ua-modal-close" title="Fermer">&times;</button>'
       + '<div class="ua-logo-icon"><i class="fas fa-universal-access"></i></div>'
-      + '<h2>Accessibilité CNIG Dieppe</h2>'
+      + '<h2>Access Losse-en-Gelaisse</h2>'
       + '<p>Plateforme de gestion d&#39;accessibilité</p>'
       + '</div>'
       + '<div id="ua-modal-body">'
@@ -708,11 +708,11 @@
       '    </div>',
       '  </div>',
       '  <div id="ua-rgpd-body">',
-      '    <p>En utilisant la plateforme <strong>Accessibilité CNIG Dieppe</strong>, vous acceptez que les données suivantes soient collectées et traitées :</p>',
+      '    <p>En utilisant la plateforme <strong>Access Losse-en-Gelaisse</strong>, vous acceptez que les données suivantes soient collectées et traitées :</p>',
       '    <ul>',
-      '      <li><i class="fas fa-envelope"></i> <strong>Adresse e-mail</strong> — identification et notifications</li>',
-      '      <li><i class="fas fa-clock"></i> <strong>Date et heure de connexion</strong> — sécurité du compte</li>',
-      '      <li><i class="fas fa-map-marker-alt"></i> <strong>Actions sur la carte</strong> — amélioration du service</li>',
+      '      <li><i class="fas fa-envelope"></i> <strong>Adresse e-mail</strong> : identification et notifications</li>',
+      '      <li><i class="fas fa-clock"></i> <strong>Date et heure de connexion</strong> : sécurité du compte</li>',
+      '      <li><i class="fas fa-map-marker-alt"></i> <strong>Actions sur la carte</strong> : amélioration du service</li>',
       '    </ul>',
       '    <p>Ces données sont utilisées exclusivement dans le cadre de la gestion de l\'accessibilité urbaine de la ville de Dieppe. Elles ne sont jamais transmises à des tiers.</p>',
       '    <div class="ua-rgpd-rights">',
