@@ -416,17 +416,14 @@
         document.querySelector("ul.nav.navbar-nav.navbar-right") ||
         document.querySelector("ul.navbar-nav.navbar-right") ||
         document.querySelector("ul.navbar-nav");
-      if (navRight) {
-        var anchor = document.getElementById("ua-user-chip")
-                  || document.getElementById("ua-login-btn-nav");
-        if (anchor) {
-          navRight.insertBefore(li, anchor);
-        } else {
-          navRight.appendChild(li);
-        }
+      var routingItem = document.getElementById("routing-nav-item");
+
+      if (navRight && routingItem) {
+        /* Insérer juste après le bouton Itinéraire */
+        var next = routingItem.nextSibling;
+        next ? navRight.insertBefore(li, next) : navRight.appendChild(li);
         document.getElementById("fb-nav-btn").addEventListener("click", _openPanel);
 
-        /* Badge pour tous les utilisateurs avec controle_qualite */
         if (hasQC) {
           _loadBadgeCount();
           setInterval(_loadBadgeCount, 15000);
@@ -435,6 +432,12 @@
         setTimeout(function () {
           _tryInject(attempts - 1);
         }, 300);
+      } else if (navRight) {
+        /* Dernier recours : avant avatar ou bouton connexion */
+        var anchor = document.getElementById("ua-user-chip")
+                  || document.getElementById("ua-login-btn-nav");
+        anchor ? navRight.insertBefore(li, anchor) : navRight.appendChild(li);
+        document.getElementById("fb-nav-btn").addEventListener("click", _openPanel);
       }
     }
     _tryInject(20);

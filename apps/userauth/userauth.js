@@ -219,19 +219,13 @@
                   || document.querySelector("ul.navbar-nav.navbar-right")
                   || document.querySelector("ul.navbar-nav");
       if (navRight) {
-        // Séparateur vertical entre boutons et chip
         var oldSep = document.getElementById("ua-nav-sep");
         if (oldSep) oldSep.parentNode.removeChild(oldSep);
-        var sep = document.createElement("li");
-        sep.id = "ua-nav-sep";
-        sep.className = "ua-nav-sep";
 
         var helpLi = navRight.querySelector("li.ms-3");
         if (helpLi) {
-          navRight.insertBefore(sep, helpLi);
           navRight.insertBefore(li, helpLi);
         } else {
-          navRight.appendChild(sep);
           navRight.appendChild(li);
         }
         _bindChipEvents(type);
