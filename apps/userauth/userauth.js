@@ -8,7 +8,7 @@
   "use strict";
 
   /* ── Configuration ───────────────────────────────────────── */
-  var API_BASE = "/auth";
+  var API_BASE = "https://hermes58.alwaysdata.net/auth";
   var LS_ACCESS  = "ua_access_token";
   var LS_REFRESH = "ua_refresh_token";
 
