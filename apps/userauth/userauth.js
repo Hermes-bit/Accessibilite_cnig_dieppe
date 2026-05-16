@@ -1043,6 +1043,7 @@
 
     var token = _getToken();
     if (!token) {
+      _applyRoleRestrictions(null);
       _showStep(1);
       _showOverlay();
       return;
@@ -1069,6 +1070,7 @@
     })
     .catch(function () {
       _clearToken();
+      _applyRoleRestrictions(null);
       _showStep(1);
       _showOverlay();
     });
