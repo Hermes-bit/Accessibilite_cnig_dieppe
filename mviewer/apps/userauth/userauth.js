@@ -18,6 +18,10 @@
     link.rel  = "stylesheet";
     link.href = "apps/userauth/userauth.css";
     document.head.appendChild(link);
+    var linkRgpd = document.createElement("link");
+    linkRgpd.rel  = "stylesheet";
+    linkRgpd.href = "apps/userauth/userauth-rgpd.css";
+    document.head.appendChild(linkRgpd);
   })();
 
   /* ================================================================
