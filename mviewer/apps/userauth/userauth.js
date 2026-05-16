@@ -848,6 +848,37 @@
     if (perms.indexOf("edition_donnees") === -1) {
       _hideNavItem("dbe-nav-item");
     }
+    if (!user) {
+      document.body.classList.add("ua-guest");
+      _showGuestBanner();
+    } else {
+      document.body.classList.remove("ua-guest");
+      _hideGuestBanner();
+    }
+  }
+
+  function _showGuestBanner() {
+    if (document.getElementById("ua-guest-banner")) return;
+    var bar = document.createElement("div");
+    bar.id = "ua-guest-banner";
+    bar.innerHTML = [
+      '<i class="fas fa-info-circle"></i>',
+      '<span>Connectez-vous pour accéder à l\'itinéraire et à toutes les fonctionnalités de la plateforme.</span>',
+      '<button id="ua-guest-login-btn">Se connecter</button>',
+      '<button id="ua-guest-close" title="Fermer">&times;</button>',
+    ].join(" ");
+    document.body.appendChild(bar);
+    document.getElementById("ua-guest-login-btn").addEventListener("click", function () {
+      _hideGuestBanner();
+      _showStep(1);
+      _showOverlay();
+    });
+    document.getElementById("ua-guest-close").addEventListener("click", _hideGuestBanner);
+  }
+
+  function _hideGuestBanner() {
+    var bar = document.getElementById("ua-guest-banner");
+    if (bar) bar.parentNode.removeChild(bar);
   }
 
   function _hideNavItem(id) {
